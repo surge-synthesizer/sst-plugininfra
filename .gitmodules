@@ -1,0 +1,3 @@
+[submodule "libs/filesystem/filesystem"]
+	path = libs/filesystem/ghc-filesystem
+	url = https://github.com/gulrak/filesystem.git
