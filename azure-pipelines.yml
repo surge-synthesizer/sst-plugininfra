@@ -28,9 +28,14 @@ jobs:
       - checkout: self
         fetchDepth: 1
 
+
       - bash: |
+          git submodule update --init --recursive
           cmake -Bbuild -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release
+        displayName: Build Tests
+
+      - bash: |
           pushd ./build/test-binary 
           ./sst-plugininfra-tests
           ./sst-tixml-tests
