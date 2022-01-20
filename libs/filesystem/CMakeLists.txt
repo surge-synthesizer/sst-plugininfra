@@ -26,6 +26,8 @@ function(use_ghc_fs)
             PRIVATE GHC_FILESYSTEM_IMPLEMENTATION
             )
     target_include_directories(${PROJECT_NAME} PUBLIC "${INC_DIR}")
+    set_property(TARGET ${PROJECT_NAME} PROPERTY C_VISIBILITY_PRESET hidden)
+    set_property(TARGET ${PROJECT_NAME} PROPERTY VISIBILITY_INLINES_HIDDEN ON)
 endfunction()
 
 function(use_platform_fs)
