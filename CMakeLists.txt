@@ -3,12 +3,28 @@ project(sst-plugininfra VERSION 0.5 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_library(${PROJECT_NAME} INTERFACE)
-target_include_directories(${PROJECT_NAME} INTERFACE include)
 
 add_subdirectory(libs/filesystem)
 add_subdirectory(libs/tinyxml)
 add_library(${PROJECT_NAME}::tinyxml ALIAS tinyxml)
+
+
+configure_file(src/paths_subst.cpp.in ${CMAKE_BINARY_DIR}/gen/paths_subst.cpp)
+
+add_library(${PROJECT_NAME} EXCLUDE_FROM_ALL ${CMAKE_BINARY_DIR}/gen/paths_subst.cpp)
+target_include_directories(${PROJECT_NAME} PUBLIC include)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${PROJECT_NAME}::filesystem)
+
+
+if (WIN32)
+    target_sources(${PROJECT_NAME} PRIVATE src/paths_windows.cpp)
+elseif (APPLE)
+    target_sources(${PROJECT_NAME} PRIVATE src/paths_macos.mm)
+    target_link_libraries(${PROJECT_NAME} PRIVATE "-framework Foundation")
+else ()
+    target_sources(${PROJECT_NAME} PRIVATE src/paths_linux.cpp)
+    target_link_libraries(${PROJECT_NAME} PUBLIC dl)
+endif ()
 
 
 get_directory_property(parent_dir PARENT_DIRECTORY)

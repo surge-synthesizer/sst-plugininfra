@@ -4,11 +4,6 @@
 #include <sst/plugininfra.h>
 #include "filesystem/import.h"
 
-TEST_CASE("Basic")
-{
-    SECTION("Base Test") { REQUIRE(sst::plugininfra::addOne(1) == 2); }
-}
-
 TEST_CASE("FileSystem")
 {
     SECTION("Can make a path")
@@ -17,6 +12,16 @@ TEST_CASE("FileSystem")
         auto s = p.u8string();
         s[3] = ' ';
         REQUIRE(s == "tmp var");
+    }
+}
+
+TEST_CASE( "Documents Folder" )
+{
+    SECTION( "Got a documents folder" )
+    {
+        auto dpath = sst::plugininfra::paths::bestDocumentsFolderPathFor("surge-test");
+        std::cout << dpath.u8string() << std::endl;
+        REQUIRE(true);
     }
 }
 

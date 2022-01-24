@@ -39,4 +39,5 @@ jobs:
           pushd ./build/test-binary 
           ./sst-plugininfra-tests
           ./sst-tixml-tests
+          ./dumppaths
         displayName: Run tests with cmake
