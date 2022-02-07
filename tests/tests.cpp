@@ -2,6 +2,7 @@
 #include "catch2/catch2.hpp"
 
 #include <sst/plugininfra.h>
+#include <sst/plugininfra/userdefaults.h>
 #include "filesystem/import.h"
 
 TEST_CASE("FileSystem")
@@ -46,6 +47,99 @@ TEST_CASE("FTZ", "[dsp]")
             REQUIRE(res_float[i] == 0);
         }
         REQUIRE(ftz_float == 0.f);
+    }
+}
+
+TEST_CASE("Defaults")
+{
+    enum K
+    {
+        Foo,
+        Bar,
+        Three,
+        Four,
+        nK
+    };
+    auto k2s = [](K k) -> std::string {
+        if (k == Foo)
+            return "Foo";
+        if (k == Bar)
+            return "Bar";
+        if (k == Three)
+            return "Three";
+        if (k == Four)
+            return "Four";
+        return "Blugh";
+    };
+    using P = sst::plugininfra::defaults::Provider<K, nK>;
+
+    SECTION("Write and Read")
+    {
+        int di = 0;
+        auto td = fs::temp_directory_path() / ("tst_" + std::to_string(di));
+        while (fs::exists(td) && di < 1000)
+        {
+            di++;
+            td = fs::temp_directory_path() / ("tst_" + std::to_string(di));
+        }
+        REQUIRE(di < 1000);
+        fs::create_directories(td);
+        INFO("Making test in " << td.u8string());
+        auto p1 = P(td, "TestCase", k2s, [](auto a, auto b) {});
+        REQUIRE(p1.getUserDefaultValue(Foo, 1) == 1);
+        REQUIRE(p1.getUserDefaultValue(Bar, "bb") == "bb");
+        REQUIRE(p1.getUserDefaultValue(Three, std::pair{2, 2}) == std::pair{2, 2});
+        REQUIRE(p1.getUserDefaultPath(Four, td) == td);
+
+        p1.updateUserDefaultValue(Foo, 2);
+        p1.updateUserDefaultValue(Bar, "qq");
+        p1.updateUserDefaultValue(Three, std::pair{7, 9});
+        auto nd = td / ("chg" + std::to_string(rand()));
+        p1.updateUserDefaultPath(Four, nd);
+
+        REQUIRE(p1.getUserDefaultValue(Foo, 1) == 2);
+        REQUIRE(p1.getUserDefaultValue(Bar, "bb") == "qq");
+        REQUIRE(p1.getUserDefaultValue(Three, std::pair{2, 2}) == std::pair{7, 9});
+        REQUIRE(p1.getUserDefaultPath(Four, td) == nd);
+    }
+
+    SECTION("Write and Read Cross Instances")
+    {
+        int di = 0;
+        auto td = fs::temp_directory_path() / ("tst_" + std::to_string(di));
+        while (fs::exists(td) && di < 1000)
+        {
+            di++;
+            td = fs::temp_directory_path() / ("tst_" + std::to_string(di));
+        }
+        auto nd = td / ("chg" + std::to_string(rand()));
+
+        REQUIRE(di < 1000);
+        fs::create_directories(td);
+        INFO("Making test in " << td.u8string());
+        {
+            auto p1 = P(td, "TestCase", k2s, [](auto a, auto b) {});
+            REQUIRE(p1.getUserDefaultValue(Foo, 1) == 1);
+            REQUIRE(p1.getUserDefaultValue(Bar, "bb") == "bb");
+            REQUIRE(p1.getUserDefaultValue(Three, std::pair{2, 2}) == std::pair{2, 2});
+            REQUIRE(p1.getUserDefaultPath(Four, td) == td);
+
+            p1.updateUserDefaultValue(Foo, 2);
+            p1.updateUserDefaultValue(Bar, "qq");
+            p1.updateUserDefaultValue(Three, std::pair{7, 9});
+            p1.updateUserDefaultPath(Four, nd);
+
+            REQUIRE(p1.getUserDefaultValue(Foo, 1) == 2);
+            REQUIRE(p1.getUserDefaultValue(Bar, "bb") == "qq");
+            REQUIRE(p1.getUserDefaultValue(Three, std::pair{2, 2}) == std::pair{7, 9});
+            REQUIRE(p1.getUserDefaultPath(Four, td) == nd);
+        }
+
+        auto p2 = P(td, "TestCase", k2s, [](auto a, auto b) {});
+        REQUIRE(p2.getUserDefaultValue(Foo, 1) == 2);
+        REQUIRE(p2.getUserDefaultValue(Bar, "bb") == "qq");
+        REQUIRE(p2.getUserDefaultValue(Three, std::pair{2, 2}) == std::pair{7, 9});
+        REQUIRE(p2.getUserDefaultPath(Four, td) == nd);
     }
 }
 
