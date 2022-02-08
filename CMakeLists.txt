@@ -7,13 +7,15 @@ set(CMAKE_CXX_STANDARD 17)
 add_subdirectory(libs/filesystem)
 add_subdirectory(libs/tinyxml)
 add_library(${PROJECT_NAME}::tinyxml ALIAS tinyxml)
+add_subdirectory(libs/strnatcmp)
+add_library(${PROJECT_NAME}::strnatcmp ALIAS strnatcmp)
 
 
 configure_file(src/paths_subst.cpp.in ${CMAKE_BINARY_DIR}/gen/paths_subst.cpp)
 
 add_library(${PROJECT_NAME} EXCLUDE_FROM_ALL ${CMAKE_BINARY_DIR}/gen/paths_subst.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC include)
-target_link_libraries(${PROJECT_NAME} PUBLIC ${PROJECT_NAME}::filesystem)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${PROJECT_NAME}::filesystem ${PROJECT_NAME}::strnatcmp)
 
 target_sources(${PROJECT_NAME} PRIVATE src/cpufeatures.cpp)
 
