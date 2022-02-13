@@ -196,6 +196,13 @@ TEST_CASE("strnatcmp with spaces", "[infra]")
     SECTION("Doubled Spaces") { REQUIRE(strnatcmp("Spa  Day", "Spa Day") == 0); }
 }
 
+TEST_CASE("Dark Mode Returns Something")
+{
+    bool dm = sst::plugininfra::misc_platform::isDarkMode();
+    std::cout << "DARK MODE IS " << dm << std::endl;
+    REQUIRE(true);
+}
+
 int main(int argc, char **argv)
 {
     int result = Catch::Session().run(argc, argv);
