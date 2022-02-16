@@ -32,6 +32,9 @@ else ()
     target_link_libraries(${PROJECT_NAME} PUBLIC dl)
 endif ()
 
+set_property(TARGET ${PROJECT_NAME} PROPERTY C_VISIBILITY_PRESET hidden)
+set_property(TARGET ${PROJECT_NAME} PROPERTY VISIBILITY_INLINES_HIDDEN ON)
+
 
 get_directory_property(parent_dir PARENT_DIRECTORY)
 if ("${parent_dir}" STREQUAL "")
