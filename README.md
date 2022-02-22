@@ -7,4 +7,4 @@ contains the following
 2. A (modified) version of TinyXML 1.0, the XML parser Surge and ShortCircuit use 
 3. A (modified) version of a natrual string sort (ZLib)
 
-For code outside of libs/ which has a license, the remainder is GPL3
+For code outside of libs/ which has a license, the remainder is MIT
