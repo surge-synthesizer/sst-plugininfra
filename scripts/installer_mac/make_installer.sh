@@ -16,6 +16,7 @@ echo "MAKE from $INDIR $RESOURCESDIR into $TARGET_DIR with $VERSION"
 
 VST3="${PRODUCT}.vst3"
 AU="${PRODUCT}.component"
+CLAP="${PRODUCT}.clap"
 APP="${PRODUCT}.app"
 
 PRODUCTFILE=`echo $PRODUCT | tr ' ' '-' | tr '[:upper:]' '[:lower:]'`
@@ -97,6 +98,10 @@ if [[ -d $INDIR/$APP ]]; then
     build_flavor "APP" "$APP" "org.surge-synth-team.${PRODUCTFILE}.app.pkg" "/tmp/sst-installer" $TMPDIR/AppResourcesPackageScript
 fi
 
+if [[ -d $INDIR/$CLAP ]]; then
+    build_flavor "CLAP" "$CLAP" "org.surge-synth-team.${PRODUCTFILE}.clap.pkg" "/Library/Audio/Plug-Ins/Clap"
+fi
+
 echo --- Sub Packages Created ---
 ls -l "${TMPDIR}"
 
@@ -112,11 +117,17 @@ if [[ -d $INDIR/$AU ]]; then
 	AU_CHOICE="<line choice=\"org.surge-synth-team.${PRODUCTFILE}.component.pkg\"/>"
 	AU_CHOICE_DEF="<choice id=\"org.surge-synth-team.${PRODUCTFILE}.component.pkg\" visible=\"true\" start_selected=\"true\" title=\"${PRODUCT} Audio Unit\"><pkg-ref id=\"org.surge-synth-team.${PRODUCTFILE}.component.pkg\"/></choice><pkg-ref id=\"org.surge-synth-team.${PRODUCTFILE}.component.pkg\" version=\"${VERSION}\" onConclusion=\"none\">${PRODUCTFILE}_AU.pkg</pkg-ref>"
 fi
+if [[ -d $INDIR/$CLAP ]]; then
+	CLAP_PKG_REF="<pkg-ref id=\"org.surge-synth-team.${PRODUCTFILE}.clap.pkg\"/>"
+	CLAP_CHOICE="<line choice=\"org.surge-synth-team.${PRODUCTFILE}.clap.pkg\"/>"
+	CLAP_CHOICE_DEF="<choice id=\"org.surge-synth-team.${PRODUCTFILE}.clap.pkg\" visible=\"true\" start_selected=\"false\" title=\"${PRODUCT} Clap (0.18)\"><pkg-ref id=\"org.surge-synth-team.${PRODUCTFILE}.clap.pkg\"/></choice><pkg-ref id=\"org.surge-synth-team.${PRODUCTFILE}.clap.pkg\" version=\"${VERSION}\" onConclusion=\"none\">${PRODUCTFILE}_CLAP.pkg</pkg-ref>"
+fi
 if [[ -d $INDIR/$APP ]]; then
 	APP_PKG_REF="<pkg-ref id=\"org.surge-synth-team.${PRODUCTFILE}.app.pkg\"/>"
 	APP_CHOICE="<line choice=\"org.surge-synth-team.${PRODUCTFILE}.app.pkg\"/>"
 	APP_CHOICE_DEF="<choice id=\"org.surge-synth-team.${PRODUCTFILE}.app.pkg\" visible=\"true\" start_selected=\"true\" title=\"${PRODUCT} App\"><pkg-ref id=\"org.surge-synth-team.${PRODUCTFILE}.app.pkg\"/></choice><pkg-ref id=\"org.surge-synth-team.${PRODUCTFILE}.app.pkg\" version=\"${VERSION}\" onConclusion=\"none\">${PRODUCTFILE}_APP.pkg</pkg-ref>"
 fi
+
 
 cat > $TMPDIR/distribution.xml << XMLEND
 <?xml version="1.0" encoding="utf-8"?>
@@ -126,15 +137,18 @@ cat > $TMPDIR/distribution.xml << XMLEND
     <readme file="Readme.rtf" />
     ${VST3_PKG_REF}
     ${AU_PKG_REF}
+    ${CLAP_PKG_REF}
     ${APP_PKG_REF}
     <options require-scripts="false" customize="always" />
     <choices-outline>
         ${VST3_CHOICE}
         ${AU_CHOICE}
+        ${CLAP_CHOICE}
         ${APP_CHOICE}
     </choices-outline>
     ${VST3_CHOICE_DEF}
     ${AU_CHOICE_DEF}
+    ${CLAP_CHOICE_DEF}
     ${APP_CHOICE_DEF}
 </installer-gui-script>
 XMLEND
