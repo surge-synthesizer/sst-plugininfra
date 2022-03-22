@@ -225,7 +225,7 @@ TEST_CASE("KeyBindings Compile Absent JUCE")
         char getTextCharacter() const { return ' '; }
         int getKeyCode() const { return 0; }
     };
-    typedef sst::jucepluginfra::KeyMapManager<Foo, 3, TestKeyPress> keymap_t;
+    typedef sst::plugininfra::KeyMapManager<Foo, 3, TestKeyPress> keymap_t;
     auto km = std::make_unique<keymap_t>(
         fs::path(), "TestProduct", [](Foo f) { return ""; }, [](auto a, auto b) {});
     REQUIRE(km);

@@ -1,24 +1,6 @@
-// /*
-//  ** Surge Synthesizer is Free and Open Source Software
-//  **
-//  ** Surge is made available under the Gnu General Public License, v3.0
-//  ** https://www.gnu.org/licenses/gpl-3.0.en.html
-//  **
-//  ** Copyright 2004-2021 by various individuals as described by the Git transaction log
-//  **
-//  ** All source at: https://github.com/surge-synthesizer/surge.git
-//  **
-//  ** Surge was a commercial product from 2004-2018, with Copyright and ownership
-//  ** in that period held by Claes Johanson at Vember Audio. Claes made Surge
-//  ** open source in September 2018.
-//  *
 
-//
-// Created by Paul Walker on 3/21/22.
-//
-
-#ifndef SURGE_KEYBINDINGS_H
-#define SURGE_KEYBINDINGS_H
+#ifndef SST_PLUGININFRA_KEYBINDINGS_H
+#define SST_PLUGININFRA_KEYBINDINGS_H
 
 #include "tinyxml/tinyxml.h"
 #include "filesystem/import.h"
@@ -34,17 +16,35 @@
 
 namespace sst
 {
-namespace jucepluginfra
+namespace plugininfra
 {
+
+template <typename KEY> inline std::string keyCodeToString(int keyCode)
+{
+    return std::to_string(keyCode);
+}
+
+template <typename KEY> inline int keyCodeFromString(const std::string &s)
+{
+    return std::atoi(s.c_str());
+}
 
 template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> struct KeyMapManager
 {
     std::function<std::string(FUNCS)> enumToString;
-    KeyMapManager(const fs::path &defaultsDirectory, const std::string &productName,
+    std::string productName;
+    fs::path productPath;
+    std::unordered_map<std::string, FUNCS> stringToEnum;
+    KeyMapManager(const fs::path &productPath, const std::string &productName,
                   const std::function<std::string(FUNCS)> &e2S,
                   const std::function<void(const std::string &, const std::string &)> &errHandle)
-        : enumToString(e2S)
+        : enumToString(e2S), productPath(productPath), productName(productName)
     {
+        for (int i = 0; i < maxFunc; ++i)
+        {
+            FUNCS f = (FUNCS)i;
+            stringToEnum[enumToString(f)] = f;
+        }
     }
 
     enum Modifiers
@@ -53,16 +53,17 @@ template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> stru
         SHIFT = 1 << 0,
         ALT = 1 << 1,
         COMMAND = 1 << 2,
-        CONTROL = 1 << 3
+        CONTROL = 1 << 3 // values are streamed
     };
 
     struct Binding
     {
         enum Type
         {
-            TEXTCHAR,
-            KEYCODE
-        } type;
+            INVALID = 0,
+            TEXTCHAR = 1,
+            KEYCODE = 2 // values are streamed
+        } type{INVALID};
 
         Modifiers modifier{NONE};
         char textChar{0};
@@ -73,6 +74,7 @@ template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> stru
         Binding(Modifiers mod, char tc) : type(TEXTCHAR), textChar(tc), modifier(mod) {}
         Binding(Modifiers mod, int kc) : type(KEYCODE), keyCode(kc), modifier(mod) {}
         Binding(int kc) : type(KEYCODE), keyCode(kc), modifier(NONE) {}
+        Binding() {}
 
         bool matches(const KEY &key) const
         {
@@ -124,10 +126,85 @@ template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> stru
         return {};
     }
 
-    void unstreamFromXML() {}
-    void streamToXML() {}
+    bool unstreamFromXML()
+    {
+        TiXmlDocument doc;
+        if (!doc.LoadFile(productPath / (productName + "_keymappings.xml")))
+        {
+            return false;
+        }
+
+        auto el = doc.FirstChildElement("keymappings");
+        if (!el)
+            return false;
+        auto c = el->FirstChildElement();
+        while (c)
+        {
+            auto f = stringToEnum[c->Attribute("function")];
+
+            if (bindings.find(f) == bindings.end())
+                bindings[f] = Binding();
+
+            auto &b = bindings[f];
+
+            int typeInt;
+            if (c->Attribute("type", &(typeInt)))
+            {
+                b.type = static_cast<typename Binding::Type>(typeInt);
+            }
+            int ai;
+            if (c->Attribute("active", &(ai)))
+            {
+                b.active = (bool)(ai);
+            }
+            int mod;
+            if (c->Attribute("modifier", &(mod)))
+            {
+                b.modifier = static_cast<Modifiers>(mod);
+            }
+
+            auto tc = c->Attribute("textChar");
+            if (tc && tc[0] != 0)
+                b.textChar = tc[0];
+
+            auto kc = c->Attribute("keyCode");
+            if (kc)
+                b.keyCode = keyCodeFromString<KEY>(kc);
+
+            c = c->NextSiblingElement();
+        }
+
+        return true;
+    }
+    void streamToXML()
+    {
+        TiXmlDocument doc;
+        doc.SetTabSize(4);
+        TiXmlElement root("keymappings");
+
+        for (const auto &[f, b] : bindings)
+        {
+            TiXmlElement bx("binding");
+            bx.SetAttribute("function", enumToString(f));
+
+            bx.SetAttribute("active", b.active);
+            bx.SetAttribute("type", b.type);
+            bx.SetAttribute("modifier", b.modifier);
+            bx.SetAttribute("keyCode", keyCodeToString<KEY>(b.keyCode));
+
+            char tc[2];
+            tc[1] = 0;
+            tc[0] = b.textChar;
+            bx.SetAttribute("textChar", tc);
+            root.InsertEndChild(bx);
+        }
+
+        doc.InsertEndChild(root);
+        // inject the path_to_string to go down the xml path which formats.
+        doc.SaveFile(path_to_string(productPath / (productName + "_keymappings.xml")));
+    }
 };
-} // namespace jucepluginfra
+} // namespace plugininfra
 } // namespace sst
 
 #endif // SURGE_KEYBINDINGS_H
