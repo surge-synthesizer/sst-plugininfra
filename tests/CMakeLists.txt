@@ -3,6 +3,9 @@ target_include_directories(sst-plugininfra-tests PRIVATE tests)
 target_link_libraries(sst-plugininfra-tests PUBLIC sst-plugininfra sst-plugininfra::filesystem sst-plugininfra::tinyxml)
 target_sources(sst-plugininfra-tests PRIVATE
         tests.cpp)
+set_property(TARGET sst-plugininfra-tests PROPERTY C_VISIBILITY_PRESET hidden)
+set_property(TARGET sst-plugininfra-tests PROPERTY VISIBILITY_INLINES_HIDDEN ON)
+
 
 add_executable(sst-tixml-tests)
 target_sources(sst-tixml-tests PRIVATE ${CMAKE_SOURCE_DIR}/libs/tinyxml/test/xmltest.cpp)

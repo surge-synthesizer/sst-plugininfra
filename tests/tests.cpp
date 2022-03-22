@@ -4,6 +4,7 @@
 #include <sst/plugininfra.h>
 #include <sst/plugininfra/userdefaults.h>
 #include <sst/plugininfra/strnatcmp.h>
+#include "sst/plugininfra/keybindings.h"
 #include "filesystem/import.h"
 
 TEST_CASE("FileSystem")
@@ -201,6 +202,36 @@ TEST_CASE("Dark Mode Returns Something")
     bool dm = sst::plugininfra::misc_platform::isDarkMode();
     std::cout << "DARK MODE IS " << dm << std::endl;
     REQUIRE(true);
+}
+
+TEST_CASE("KeyBindings Compile Absent JUCE")
+{
+    enum Foo
+    {
+        FIRST,
+        SECOND,
+        THIRD
+    };
+    struct TestKeyPress
+    {
+        struct M
+        {
+            bool isCtrlDown() const { return false; }
+            bool isAltDown() const { return false; }
+            bool isShiftDown() const { return false; }
+            bool isCommandDown() const { return false; }
+        };
+        M getModifiers() const { return M(); }
+        char getTextCharacter() const { return ' '; }
+        int getKeyCode() const { return 0; }
+    };
+    typedef sst::jucepluginfra::KeyMapManager<Foo, 3, TestKeyPress> keymap_t;
+    auto km = std::make_unique<keymap_t>(
+        fs::path(), fs::path(), [](Foo f) { return ""; }, [](auto a, auto b) {});
+    REQUIRE(km);
+
+    km->addBinding(FIRST, {'S'});
+    km->matches(TestKeyPress());
 }
 
 int main(int argc, char **argv)

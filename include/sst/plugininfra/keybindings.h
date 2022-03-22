@@ -36,7 +36,7 @@ namespace sst
 namespace jucepluginfra
 {
 
-template <typename FUNCS, int maxFunc> struct KeyMapManager
+template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> struct KeyMapManager
 {
     std::function<std::string(FUNCS)> enumToString;
     KeyMapManager(const fs::path &defaultsDirectory, const std::string &productName,
@@ -73,11 +73,11 @@ template <typename FUNCS, int maxFunc> struct KeyMapManager
         Binding(Modifiers mod, int kc) : type(KEYCODE), keyCode(kc), modifier(mod) {}
         Binding(int kc) : type(KEYCODE), keyCode(kc), modifier(NONE) {}
 
-        bool matches(const juce::KeyPress &key) const
+        bool matches(const KEY &key) const
         {
             if (!active)
                 return false;
-            
+
             switch (modifier)
             {
             case SHIFT:
@@ -110,8 +110,8 @@ template <typename FUNCS, int maxFunc> struct KeyMapManager
     };
 
     std::unordered_map<FUNCS, Binding> bindings;
-    void addBinding(const FUNCS &f, const Binding &&b) { bindings.template emplace(f, b); }
-    std::optional<FUNCS> matches(const juce::KeyPress &p)
+    void addBinding(const FUNCS &f, const Binding &&b) { bindings.emplace(f, b); }
+    std::optional<FUNCS> matches(const KEY &p)
     {
         for (const auto &[f, b] : bindings)
         {
