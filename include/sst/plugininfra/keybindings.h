@@ -23,6 +23,7 @@
 #include "tinyxml/tinyxml.h"
 #include "filesystem/import.h"
 #include <functional>
+#include <optional>
 #include <string>
 #include <iostream>
 #include <iomanip>
