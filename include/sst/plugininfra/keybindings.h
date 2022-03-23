@@ -31,6 +31,7 @@ template <typename KEY> inline int keyCodeFromString(const std::string &s)
 
 template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> struct KeyMapManager
 {
+    static constexpr int numFuncs = maxFunc;
     std::function<std::string(FUNCS)> enumToString;
     std::string productName;
     fs::path productPath;
@@ -112,7 +113,8 @@ template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> stru
         }
     };
 
-    std::unordered_map<FUNCS, Binding> bindings;
+    std::map<FUNCS, Binding> bindings; // want this ordered for iteration display
+    void clearBindings() { bindings.clear(); }
     void addBinding(const FUNCS &f, const Binding &&b) { bindings.emplace(f, b); }
     std::optional<FUNCS> matches(const KEY &p)
     {
