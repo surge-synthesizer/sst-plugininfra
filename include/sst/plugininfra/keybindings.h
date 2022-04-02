@@ -131,7 +131,7 @@ template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> stru
     bool unstreamFromXML()
     {
         TiXmlDocument doc;
-        if (!doc.LoadFile(productPath / (productName + "_keymappings.xml")))
+        if (!doc.LoadFile(productPath / (productName + "KeyboardMappings.xml")))
         {
             return false;
         }
@@ -203,7 +203,7 @@ template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> stru
 
         doc.InsertEndChild(root);
         // inject the path_to_string to go down the xml path which formats.
-        doc.SaveFile(path_to_string(productPath / (productName + "_keymappings.xml")));
+        doc.SaveFile(path_to_string(productPath / (productName + "KeyboardMappings.xml")));
     }
 };
 } // namespace plugininfra
