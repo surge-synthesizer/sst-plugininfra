@@ -66,14 +66,14 @@ template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> stru
             KEYCODE = 2 // values are streamed
         } type{INVALID};
 
-        Modifiers modifier{NONE};
+        int32_t modifier{NONE};
         char textChar{0};
         int keyCode{0};
 
         bool active{true};
 
-        Binding(Modifiers mod, char tc) : type(TEXTCHAR), textChar(tc), modifier(mod) {}
-        Binding(Modifiers mod, int kc) : type(KEYCODE), keyCode(kc), modifier(mod) {}
+        Binding(uint32_t mod, char tc) : type(TEXTCHAR), textChar(tc), modifier(mod) {}
+        Binding(uint32_t mod, int kc) : type(KEYCODE), keyCode(kc), modifier(mod) {}
         Binding(int kc) : type(KEYCODE), keyCode(kc), modifier(NONE) {}
         Binding() {}
 
@@ -82,27 +82,22 @@ template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> stru
             if (!active)
                 return false;
 
-            switch (modifier)
-            {
-            case SHIFT:
-                if (!key.getModifiers().isShiftDown())
+            auto check = [this](Modifiers m, bool b) {
+                if ((modifier & m) && !b)
                     return false;
-                break;
-            case COMMAND:
-                if (!key.getModifiers().isCommandDown())
+                if (!(modifier & m) && b)
                     return false;
-                break;
-            case CONTROL:
-                if (!key.getModifiers().isCtrlDown())
-                    return false;
-                break;
-            case ALT:
-                if (!key.getModifiers().isAltDown())
-                    return false;
-                break;
-            case NONE:
-                break;
-            }
+                return true;
+            };
+
+            if (!check(SHIFT, key.getModifiers().isShiftDown()))
+                return false;
+            if (!check(COMMAND, key.getModifiers().isCommandDown()))
+                return false;
+            if (!check(CONTROL, key.getModifiers().isCtrlDown()))
+                return false;
+            if (!check(ALT, key.getModifiers().isAltDown()))
+                return false;
 
             if (type == KEYCODE && key.getKeyCode() == keyCode)
                 return true;
@@ -162,7 +157,7 @@ template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> stru
             int mod;
             if (c->Attribute("modifier", &(mod)))
             {
-                b.modifier = static_cast<Modifiers>(mod);
+                b.modifier = static_cast<uint32_t>(mod);
             }
 
             auto tc = c->Attribute("textChar");
