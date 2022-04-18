@@ -92,9 +92,10 @@ template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> stru
 
             if (!check(SHIFT, key.getModifiers().isShiftDown()))
                 return false;
-#if _WINDOWS
+#if SST_COMMAND_CTRL_SAME_KEY
             // Windows doesn't separate command and control gestures
-            if (!check(COMMAND | CONTROL, key.getModifiers().isCommandDown() || key.getModifiers().isCtrlDown()))
+            if (!check(COMMAND | CONTROL,
+                       key.getModifiers().isCommandDown() || key.getModifiers().isCtrlDown()))
                 return false;
 #else
             if (!check(COMMAND, key.getModifiers().isCommandDown()))
