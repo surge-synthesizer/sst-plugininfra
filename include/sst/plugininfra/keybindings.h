@@ -48,7 +48,7 @@ template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> stru
         }
     }
 
-    enum Modifiers
+    enum Modifiers : uint32_t
     {
         NONE = 0,
         SHIFT = 1 << 0,
@@ -66,7 +66,7 @@ template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> stru
             KEYCODE = 2 // values are streamed
         } type{INVALID};
 
-        int32_t modifier{NONE};
+        uint32_t modifier{NONE};
         char textChar{0};
         int keyCode{0};
 
@@ -82,7 +82,7 @@ template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> stru
             if (!active)
                 return false;
 
-            auto check = [this](Modifiers m, bool b) {
+            auto check = [this](uint32_t m, bool b) {
                 if ((modifier & m) && !b)
                     return false;
                 if (!(modifier & m) && b)
@@ -92,10 +92,16 @@ template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> stru
 
             if (!check(SHIFT, key.getModifiers().isShiftDown()))
                 return false;
+#if _WINDOWS
+            // Windows doesn't separate command and control gestures
+            if (!check(COMMAND | CONTROL, key.getModifiers().isCommandDown() || key.getModifiers().isCtrlDown()))
+                return false;
+#else
             if (!check(COMMAND, key.getModifiers().isCommandDown()))
                 return false;
             if (!check(CONTROL, key.getModifiers().isCtrlDown()))
                 return false;
+#endif
             if (!check(ALT, key.getModifiers().isAltDown()))
                 return false;
 
