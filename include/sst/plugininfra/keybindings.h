@@ -77,6 +77,22 @@ template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> stru
         Binding(int kc) : type(KEYCODE), keyCode(kc), modifier(NONE) {}
         Binding() {}
 
+        bool operator==(const Binding &other) const {
+            if (modifier != other.modifier) return false;
+            if (active != other.active) return false;
+            if (type != other.type) return false;
+            if (type == KEYCODE)
+            {
+                if (keyCode != other.keyCode)
+                    return false;
+            }
+            else
+            {
+                if (textChar != other.textChar)
+                    return false;
+            }
+            return true;
+        }
         bool matches(const KEY &key) const
         {
             if (!active)
@@ -116,8 +132,19 @@ template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> stru
     };
 
     std::map<FUNCS, Binding> bindings; // want this ordered for iteration display
-    void clearBindings() { bindings.clear(); }
-    void addBinding(const FUNCS &f, const Binding &&b) { bindings.emplace(f, b); }
+    std::map<FUNCS, Binding> defaultBindings;
+    void clearBindings()
+    {
+        bindings.clear();
+        defaultBindings.clear();
+    }
+    void addBinding(const FUNCS &f, const Binding &&b)
+    {
+        bindings.emplace(f, b);
+        // First one in is the default
+        if (defaultBindings.find(f) == defaultBindings.end())
+            defaultBindings.emplace(f, b);
+    }
     std::optional<FUNCS> matches(const KEY &p)
     {
         for (const auto &[f, b] : bindings)
@@ -144,7 +171,16 @@ template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> stru
         auto c = el->FirstChildElement();
         while (c)
         {
-            auto f = stringToEnum[c->Attribute("function")];
+            FUNCS f;
+            if (stringToEnum.find(c->Attribute("function")) != stringToEnum.end())
+            {
+                f = stringToEnum[c->Attribute("function")];
+            }
+            else
+            {
+                std::cerr << "Ignoring binding for unknown element " << c->Attribute("function") << std::endl;
+                continue;
+            }
 
             if (bindings.find(f) == bindings.end())
                 bindings[f] = Binding();
