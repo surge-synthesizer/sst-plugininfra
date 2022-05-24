@@ -106,8 +106,32 @@ template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> stru
                 return true;
             };
 
+            auto kc = key.getKeyCode();
+#if LINUX
+            // Chording on linux is a mess. See  surge issue #6144
+            if (kc >= 'a' && kc <= 'z')
+            {
+                kc = kc + 'A' - 'a';
+            }
+#endif
+
             if (!check(SHIFT, key.getModifiers().isShiftDown()))
+#if LINUX
+            {
+                if (modifier != SHIFT && modifier != NONE && type == KEYCODE)
+                {
+                    /* this could be a linux user trying to upcase a key
+                     * and chording is odd. Lets see if this fixes it
+                     */
+                }
+                else
+                {
+                    return false;
+                }
+            }
+#else
                 return false;
+#endif
 #if SST_COMMAND_CTRL_SAME_KEY
             // Windows doesn't separate command and control gestures
             if (!check(COMMAND | CONTROL,
@@ -122,7 +146,7 @@ template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> stru
             if (!check(ALT, key.getModifiers().isAltDown()))
                 return false;
 
-            if (type == KEYCODE && key.getKeyCode() == keyCode)
+            if (type == KEYCODE && kc == keyCode)
                 return true;
             if (type == TEXTCHAR && key.getTextCharacter() == textChar)
                 return true;
