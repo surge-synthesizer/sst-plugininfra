@@ -120,16 +120,21 @@ template <typename E, int maxE> struct Provider
         return storeUserDefaultValue(key, value, UserDefaultValue::ud_pair);
     }
 
-    inline bool updateUserDefaultPath(const E &key,
-                                      const fs::path &path)
+    inline bool updateUserDefaultPath(const E &key, const fs::path &path)
     {
         return updateUserDefaultValue(key, path_to_string(path));
     }
 
-
     void addOverride(E key, const std::string &s) { userPrefOverrides[key] = {0, s}; }
 
     void addOverride(E key, int i) { userPrefOverrides[key] = {i, ""}; }
+
+    void clearOverride(E key)
+    {
+        auto it = userPrefOverrides.find(key);
+        if (it != userPrefOverrides.end())
+            userPrefOverrides.erase(it);
+    }
 
   private:
     std::function<std::string(E)> enumToString;
