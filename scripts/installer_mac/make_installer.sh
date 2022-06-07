@@ -99,7 +99,7 @@ if [[ -d $INDIR/$APP ]]; then
 fi
 
 if [[ -d $INDIR/$CLAP ]]; then
-    build_flavor "CLAP" "$CLAP" "org.surge-synth-team.${PRODUCTFILE}.clap.pkg" "/Library/Audio/Plug-Ins/Clap"
+    build_flavor "CLAP" "$CLAP" "org.surge-synth-team.${PRODUCTFILE}.clap.pkg" "/Library/Audio/Plug-Ins/CLAP"
 fi
 
 echo --- Sub Packages Created ---
@@ -120,7 +120,7 @@ fi
 if [[ -d $INDIR/$CLAP ]]; then
 	CLAP_PKG_REF="<pkg-ref id=\"org.surge-synth-team.${PRODUCTFILE}.clap.pkg\"/>"
 	CLAP_CHOICE="<line choice=\"org.surge-synth-team.${PRODUCTFILE}.clap.pkg\"/>"
-	CLAP_CHOICE_DEF="<choice id=\"org.surge-synth-team.${PRODUCTFILE}.clap.pkg\" visible=\"true\" start_selected=\"false\" title=\"${PRODUCT} Clap\"><pkg-ref id=\"org.surge-synth-team.${PRODUCTFILE}.clap.pkg\"/></choice><pkg-ref id=\"org.surge-synth-team.${PRODUCTFILE}.clap.pkg\" version=\"${VERSION}\" onConclusion=\"none\">${PRODUCTFILE}_CLAP.pkg</pkg-ref>"
+	CLAP_CHOICE_DEF="<choice id=\"org.surge-synth-team.${PRODUCTFILE}.clap.pkg\" visible=\"true\" start_selected=\"false\" title=\"${PRODUCT} CLAP\"><pkg-ref id=\"org.surge-synth-team.${PRODUCTFILE}.clap.pkg\"/></choice><pkg-ref id=\"org.surge-synth-team.${PRODUCTFILE}.clap.pkg\" version=\"${VERSION}\" onConclusion=\"none\">${PRODUCTFILE}_CLAP.pkg</pkg-ref>"
 fi
 if [[ -d $INDIR/$APP ]]; then
 	APP_PKG_REF="<pkg-ref id=\"org.surge-synth-team.${PRODUCTFILE}.app.pkg\"/>"
