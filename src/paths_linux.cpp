@@ -39,25 +39,12 @@ fs::path sharedLibraryBinaryPath()
 
 /*
  * Extract a custom user path defined in the file `user-dirs.dirs`.
+ * This auxiliary function which accepts an `istream` is for testing purposes.
  * The reference parser is found in Glib as `load_user_special_dirs`
  * (cf. `glib/gutils.c`).
  */
-fs::path lookupXdgUserPath(const char *xdgDirId)
+fs::path lookupXdgUserPathWithStream(const char *xdgDirId, std::istream &stream)
 {
-    fs::path home = homePath();
-    fs::path userDirsPath;
-
-    if (const char *xdgConfigPath = getenv("XDG_CONFIG_HOME"))
-    {
-        userDirsPath = fs::path{xdgConfigPath} / "user-dirs.dirs";
-    }
-    else
-    {
-        userDirsPath = home  / ".config" / "user-dirs.dirs";
-    }
-
-    fs::ifstream stream(userDirsPath);
-
     if (stream)
     {
         std::string acc;
@@ -110,7 +97,7 @@ fs::path lookupXdgUserPath(const char *xdgDirId)
             {
                 acc.push_back(static_cast<unsigned char>(c));
                 if (acc.size() == 5 && !memcmp("$HOME", acc.data(), 5))
-                    acc.assign(home.native());
+                    acc.assign(homePath().native());
             }
 
             // Expect '"'
@@ -126,6 +113,27 @@ fs::path lookupXdgUserPath(const char *xdgDirId)
     }
 
     return fs::path{};
+}
+
+/*
+ * Extract a custom user path defined in the file `user-dirs.dirs`.
+ */
+fs::path lookupXdgUserPath(const char *xdgDirId)
+{
+    fs::path home = homePath();
+    fs::path userDirsPath;
+
+    if (const char *xdgConfigPath = getenv("XDG_CONFIG_HOME"))
+    {
+        userDirsPath = fs::path{xdgConfigPath} / "user-dirs.dirs";
+    }
+    else
+    {
+        userDirsPath = home  / ".config" / "user-dirs.dirs";
+    }
+
+    fs::ifstream stream(userDirsPath);
+    return lookupXdgUserPathWithStream(xdgDirId, stream);
 }
 
 /*
