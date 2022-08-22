@@ -140,7 +140,7 @@ fs::path bestDocumentsFolderPathFor(const std::string &productName)
     fs::path xdgdd = lookupXdgUserPath("XDG_DOCUMENTS_DIR");
     if (!xdgdd.empty())
     {
-        auto xdgpath = fs::path{xdgdd} / productName;
+        auto xdgpath = xdgdd / productName;
         return xdgpath;
     }
 
