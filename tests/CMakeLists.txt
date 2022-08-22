@@ -3,6 +3,9 @@ target_include_directories(sst-plugininfra-tests PRIVATE tests)
 target_link_libraries(sst-plugininfra-tests PUBLIC sst-plugininfra sst-plugininfra::filesystem sst-plugininfra::tinyxml)
 target_sources(sst-plugininfra-tests PRIVATE
         tests.cpp)
+if (NOT WIN32 AND NOT APPLE)
+    target_sources(sst-plugininfra-tests PRIVATE tests_linux.cpp)
+endif ()
 set_property(TARGET sst-plugininfra-tests PROPERTY C_VISIBILITY_PRESET hidden)
 set_property(TARGET sst-plugininfra-tests PROPERTY VISIBILITY_INLINES_HIDDEN ON)
 
