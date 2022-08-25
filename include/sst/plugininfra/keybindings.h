@@ -77,10 +77,14 @@ template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> stru
         Binding(int kc) : type(KEYCODE), keyCode(kc), modifier(NONE) {}
         Binding() {}
 
-        bool operator==(const Binding &other) const {
-            if (modifier != other.modifier) return false;
-            if (active != other.active) return false;
-            if (type != other.type) return false;
+        bool operator==(const Binding &other) const
+        {
+            if (modifier != other.modifier)
+                return false;
+            if (active != other.active)
+                return false;
+            if (type != other.type)
+                return false;
             if (type == KEYCODE)
             {
                 if (keyCode != other.keyCode)
@@ -202,7 +206,9 @@ template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> stru
             }
             else
             {
-                std::cerr << "Ignoring binding for unknown element " << c->Attribute("function") << std::endl;
+                std::cerr << "Ignoring binding for unknown element " << c->Attribute("function")
+                          << std::endl;
+                c = c->NextSiblingElement();
                 continue;
             }
 
