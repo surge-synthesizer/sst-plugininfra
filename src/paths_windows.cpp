@@ -1,5 +1,5 @@
 /*
- * paths_linux
+ * paths_windows
  *
  * Semantics are:
  */
@@ -9,6 +9,7 @@
 #include <system_error>
 #include <windows.h>
 #include <shlobj.h>
+#include <vector>
 
 namespace sst
 {
