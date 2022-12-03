@@ -1,9 +1,17 @@
 #include "sst/plugininfra/cpufeatures.h"
 
-#if defined(__arm__) || defined(__aarch64__)
-#define ARM_NEON 1
-#else
+#if defined(__SSE2__) || defined(_M_AMD64) || defined(_M_X64) ||                                   \
+    (defined(_M_IX86_FP) && _M_IX86_FP >= 2) || defined(__x86_64__)
+#define BUILD_CPU_X86 1
 #include <xmmintrin.h>
+#else
+#define BUILD_CPU_NON_X86 1
+#if defined(__arm__) || defined(__aarch64__)
+#define BUILD_CPU_ARM 1
+#endif
+#if defined(__riscv)
+#define BUILD_CPU_RISCV 1
+#endif
 #endif
 
 #if MAC
@@ -19,7 +27,7 @@
 #include <intrin.h>
 #define cpuid(info, x) __cpuidex(info, x, 0)
 #else
-#if LINUX && !ARM_NEON
+#if LINUX && BUILD_CPU_X86
 #ifdef __GNUC__
 //  GCC Intrinsics
 #include <cpuid.h>
@@ -115,7 +123,7 @@ std::string brand()
 
 bool isArm()
 {
-#if ARM_NEON || defined(__aarch64__)
+#if BUILD_CPU_ARM
     return true;
 #else
     return false;
@@ -123,16 +131,16 @@ bool isArm()
 }
 bool isX86()
 {
-#if ARM_NEON || defined(__aarch64__)
-    return false;
-#else
+#if BUILD_CPU_X86
     return true;
+#else
+    return false;
 #endif
 }
 bool hasSSE2() { return true; }
 bool hasAVX()
 {
-#if ARM_NEON || defined(__aarch64__)
+#if BUILD_CPU_NON_X86
     return true; // thanks simde
 #else
 #if MAC
@@ -162,7 +170,7 @@ bool hasAVX()
 
 FPUStateGuard::FPUStateGuard()
 {
-#ifndef ARM_NEON
+#ifdef BUILD_CPU_X86
     auto _SSE_Flags = 0x8040;
     bool fpuExceptions = false;
 
@@ -179,7 +187,7 @@ FPUStateGuard::FPUStateGuard()
     _MM_SET_ROUNDING_MODE(_MM_ROUND_NEAREST);
 #endif
 
-#if defined(__aarch64__)
+#ifdef BUILD_CPU_ARM
     uint64_t FPCR = 0;
     asm volatile("MRS %0, FPCR " : "=r"(FPCR));
 
@@ -192,11 +200,11 @@ FPUStateGuard::FPUStateGuard()
 
 FPUStateGuard::~FPUStateGuard()
 {
-#ifndef ARM_NEON
+#ifdef BUILD_CPU_X86
     _mm_setcsr(priorS);
 #endif
 
-#if defined(__aarch64__)
+#ifdef BUILD_CPU_ARM
     asm volatile("MSR FPCR, %0 " : : "r"(priorS));
 #endif
 }
