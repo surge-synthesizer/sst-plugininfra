@@ -1,8 +1,7 @@
 #include "sst/plugininfra/cpufeatures.h"
 
-#if defined(__arm__) || defined(__aarch64__)
-#define ARM_NEON 1
-#else
+#if defined(__i386__) || defined(__x86_64__)
+#define USING_X86 1
 #include <xmmintrin.h>
 #endif
 
@@ -19,7 +18,7 @@
 #include <intrin.h>
 #define cpuid(info, x) __cpuidex(info, x, 0)
 #else
-#if LINUX && !ARM_NEON
+#if LINUX && USING_X86
 #ifdef __GNUC__
 //  GCC Intrinsics
 #include <cpuid.h>
@@ -115,7 +114,7 @@ std::string brand()
 
 bool isArm()
 {
-#if ARM_NEON || defined(__aarch64__)
+#if defined(__arm__) || defined(__aarch64__)
     return true;
 #else
     return false;
@@ -123,22 +122,20 @@ bool isArm()
 }
 bool isX86()
 {
-#if ARM_NEON || defined(__aarch64__)
-    return false;
-#else
+#if USING_X86
     return true;
+#else
+    return false;
 #endif
 }
 bool hasSSE2() { return true; }
 bool hasAVX()
 {
-#if ARM_NEON || defined(__aarch64__)
+#if !USING_X86
     return true; // thanks simde
-#else
-#if MAC
+#elif MAC
     return true;
-#endif
-#if WINDOWS || LINUX
+#elif WINDOWS || LINUX
     int info[4];
     cpuid(info, 0);
     unsigned int nIds = info[0];
@@ -156,13 +153,11 @@ bool hasAVX()
 
     return avxSup;
 #endif
-
-#endif
 }
 
 FPUStateGuard::FPUStateGuard()
 {
-#ifndef ARM_NEON
+#if USING_X86
     auto _SSE_Flags = 0x8040;
     bool fpuExceptions = false;
 
@@ -192,7 +187,7 @@ FPUStateGuard::FPUStateGuard()
 
 FPUStateGuard::~FPUStateGuard()
 {
-#ifndef ARM_NEON
+#if USING_X86
     _mm_setcsr(priorS);
 #endif
 
