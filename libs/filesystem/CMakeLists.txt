@@ -43,9 +43,15 @@ if (UNIX AND NOT APPLE)
 else ()
     set(SST_PLUGININFRA_FILESYSTEM_FORCE_GHC OFF CACHE BOOL "Force GHC filesystem implementation")
 endif ()
-if (${SST_PLUGININFRA_FILESYSTEM_FORCE_GHC})
+
+if (${SST_PLUGININFRA_FILESYSTEM_FORCE_PLATFORM})
+    message(STATUS "Forcing filesystem to platform")
+    use_platform_fs()
+elseif (${SST_PLUGININFRA_FILESYSTEM_FORCE_GHC})
+    message(STATUS "Forcing filesystem to GHC")
     use_ghc_fs()
 else ()
+    message(STATUS "Detecting Filesystem Support")
     include(CheckCXXSourceCompiles)
     check_cxx_source_compiles("
     #include <filesystem>
