@@ -29,7 +29,8 @@ fs::path homePath()
 fs::path sharedLibraryBinaryPath()
 {
     Dl_info info;
-    if (!dladdr(reinterpret_cast<const void *>(&sharedLibraryBinaryPath), &info) || !info.dli_fname[0])
+    if (!dladdr(reinterpret_cast<const void *>(&sharedLibraryBinaryPath), &info) ||
+        !info.dli_fname[0])
     {
         // If dladdr(3) returns zero, dlerror(3) won't know why either
         throw std::runtime_error{"Failed to retrieve shared object file name"};
@@ -55,7 +56,8 @@ fs::path lookupXdgUserPathWithStream(const char *xdgDirId, std::istream &stream)
         for (auto c = stream.get(); c != eof; c = stream.get())
         {
             // Skip leading space
-            for (; c == ' ' || c == '\t'; c = stream.get());
+            for (; c == ' ' || c == '\t'; c = stream.get())
+                ;
 
             // Extract the variable name
             acc.clear();
@@ -65,28 +67,33 @@ fs::path lookupXdgUserPathWithStream(const char *xdgDirId, std::istream &stream)
             // Check it's our desired variable, otherwise discard
             if (acc != xdgDirId)
             {
-                for (; c != eof && c != '\n'; c = stream.get());
+                for (; c != eof && c != '\n'; c = stream.get())
+                    ;
                 continue;
             }
 
             // Skip space preceding '='
-            for (; c == ' ' || c == '\t'; c = stream.get());
+            for (; c == ' ' || c == '\t'; c = stream.get())
+                ;
 
             // Expect '=' here, otherwise discard
             if (c != '=')
             {
-                for (; c != eof && c != '\n'; c = stream.get());
+                for (; c != eof && c != '\n'; c = stream.get())
+                    ;
                 continue;
             }
             c = stream.get();
 
             // Skip space following '='
-            for (; c == ' ' || c == '\t'; c = stream.get());
+            for (; c == ' ' || c == '\t'; c = stream.get())
+                ;
 
             // Expect '"'
             if (c != '"')
             {
-                for (; c != eof && c != '\n'; c = stream.get());
+                for (; c != eof && c != '\n'; c = stream.get())
+                    ;
                 continue;
             }
             c = stream.get();
@@ -103,7 +110,8 @@ fs::path lookupXdgUserPathWithStream(const char *xdgDirId, std::istream &stream)
             // Expect '"'
             if (c != '"')
             {
-                for (; c != eof && c != '\n'; c = stream.get());
+                for (; c != eof && c != '\n'; c = stream.get())
+                    ;
                 continue;
             }
 
@@ -129,10 +137,14 @@ fs::path lookupXdgUserPath(const char *xdgDirId)
     }
     else
     {
-        userDirsPath = home  / ".config" / "user-dirs.dirs";
+        userDirsPath = home / ".config" / "user-dirs.dirs";
     }
 
+#if SST_PLUGINFRA_GHC_FS
     fs::ifstream stream(userDirsPath);
+#else
+    std::ifstream stream(userDirsPath);
+#endif
     return lookupXdgUserPathWithStream(xdgDirId, stream);
 }
 
@@ -181,7 +193,7 @@ fs::path bestLibrarySharedFolderPathFor(const std::string &productName, bool use
         }
         else
         {
-            return home  / ".local" / "share" / productName;
+            return home / ".local" / "share" / productName;
         }
     }
 
@@ -193,6 +205,6 @@ fs::path bestLibrarySharedFolderPathFor(const std::string &productName, bool use
 
     return fs::path{CMAKE_INSTALL_PREFIX} / "share" / productName;
 }
-}
-}
-}
+} // namespace paths
+} // namespace plugininfra
+} // namespace sst

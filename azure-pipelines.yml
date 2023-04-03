@@ -39,7 +39,7 @@ jobs:
           cmake -Bbuild_ghc -DCMAKE_BUILD_TYPE=Debug -DSST_PLUGININFRA_FILESYSTEM_FORCE_GHC=ON
           cmake --build build_ghc --config Debug
         displayName: Build w GHC On (lin/mac only)
-        condition: not(variables.isWindow)
+        condition: not(variables.isWindows)
 
       - bash: |
           cmake -Bbuild_pffs -DCMAKE_BUILD_TYPE=Debug -DSST_PLUGININFRA_FILESYSTEM_FORCE_PLATFORM=ON
