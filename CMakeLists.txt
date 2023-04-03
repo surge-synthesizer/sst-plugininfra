@@ -4,12 +4,20 @@ project(sst-plugininfra VERSION 0.5 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 
 
-add_subdirectory(libs/filesystem)
-add_subdirectory(libs/tinyxml)
-add_library(${PROJECT_NAME}::tinyxml ALIAS tinyxml)
-add_subdirectory(libs/strnatcmp)
-add_library(${PROJECT_NAME}::strnatcmp ALIAS strnatcmp)
+option(SST_PLUGININFRA_FILESYSTEM_FORCE_PLATFORM "Use std::filesystem from the platform headers no matter what" OFF)
+option(SST_PLUGININFRA_PROVIDE_TINYXML "Provide tinyxml as a target" ON)
+option(SST_PLUGININFRA_PROVIDE_STRNATCMP "Provide strnatcmp as a target" ON)
 
+add_subdirectory(libs/filesystem)
+if (${SST_PLUGININFRA_PROVIDE_TINYXML})
+    add_subdirectory(libs/tinyxml)
+    add_library(${PROJECT_NAME}::tinyxml ALIAS tinyxml)
+endif ()
+
+if (${SST_PLUGININFRA_PROVIDE_STRNATCMP})
+    add_subdirectory(libs/strnatcmp)
+    add_library(${PROJECT_NAME}::strnatcmp ALIAS strnatcmp)
+endif ()
 
 configure_file(src/paths_subst.cpp.in ${CMAKE_BINARY_DIR}/gen/paths_subst.cpp)
 
