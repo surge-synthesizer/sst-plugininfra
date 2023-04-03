@@ -3,8 +3,8 @@ project(filesystem VERSION 0.0.0 LANGUAGES CXX)
 set(INC_DIR "${CMAKE_CURRENT_BINARY_DIR}/include")
 set(HEADER_DIR "${INC_DIR}/${PROJECT_NAME}")
 
-function(generate_header FS_HEADER FS_NAMESPACE)
-    message(STATUS "${PROJECT_NAME}: Using ${FS_NAMESPACE} from ${FS_HEADER}")
+function(generate_header FS_HEADER FS_NAMESPACE FS_DEFINE)
+    message(STATUS "${PROJECT_NAME}: Using ${FS_NAMESPACE} from ${FS_HEADER} with ${FS_DEFINE}")
     set(HEADER_FILE "${HEADER_DIR}/import.h")
     configure_file(src/import.h.in "${HEADER_FILE}" @ONLY)
     target_sources(${PROJECT_NAME} INTERFACE "${HEADER_FILE}")
@@ -19,7 +19,7 @@ function(use_ghc_fs)
     file(WRITE "${HEADER_FILE}" ${HEADER_DATA})
 
     add_library(${PROJECT_NAME} src/ghc-filesystem.cpp "${HEADER_FILE}")
-    generate_header("\"filesystem/ghc-filesystem.h\"" "ghc::filesystem")
+    generate_header("\"filesystem/ghc-filesystem.h\"" "ghc::filesystem" "SST_PLUGINFRA_GHC_FS")
     target_compile_definitions(${PROJECT_NAME}
             INTERFACE GHC_FILESYSTEM_FWD
             PUBLIC GHC_RAISE_UNICODE_ERRORS GHC_WIN_WSTRING_STRING_TYPE
@@ -32,7 +32,7 @@ endfunction()
 
 function(use_platform_fs)
     add_library(${PROJECT_NAME} INTERFACE)
-    generate_header("<filesystem>" "std::filesystem")
+    generate_header("<filesystem>" "std::filesystem" "SST_PLUGINFRA_PLATFORM_FS")
     target_include_directories(${PROJECT_NAME} INTERFACE "${INC_DIR}")
 endfunction()
 

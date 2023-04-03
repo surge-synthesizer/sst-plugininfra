@@ -36,6 +36,16 @@ jobs:
         displayName: Build Tests
 
       - bash: |
+          cmake -Bbuild_ghc -DCMAKE_BUILD_TYPE=Debug -DSST_PLUGININFRA_FILESYSTEM_FORCE_GHC=ON
+          cmake --build build_ghc --config Debug
+        displayName: Build w GHC On
+
+      - bash: |
+          cmake -Bbuild_pffs -DCMAKE_BUILD_TYPE=Debug -DSST_PLUGININFRA_FILESYSTEM_FORCE_PLATFORM=ON
+          cmake --build build_pffs --config Debug
+        displayName: Build w Platform FS On
+
+      - bash: |
           pushd ./build/test-binary 
           ./sst-plugininfra-tests
           ./sst-tixml-tests
