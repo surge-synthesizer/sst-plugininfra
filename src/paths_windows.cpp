@@ -40,7 +40,7 @@ fs::path knownFolderPath(REFKNOWNFOLDERID rfid, const std::string &idealName)
 
 fs::path homePath()
 {
-    return knownFolderPath(FOLDERID_Profile);
+    return knownFolderPath(FOLDERID_Profile, "Home (Profile)");
 }
 
 fs::path sharedLibraryBinaryPath()
