@@ -10,6 +10,8 @@
 #include <windows.h>
 #include <shlobj.h>
 #include <vector>
+#include <string>
+#include <sstream>
 
 namespace sst
 {
@@ -18,22 +20,27 @@ namespace plugininfra
 namespace paths
 {
 
-fs::path knownFolderPath(REFKNOWNFOLDERID rfid)
+fs::path knownFolderPath(REFKNOWNFOLDERID rfid, const std::string &idealName)
 {
     fs::path path;
     PWSTR pathStr{};
-    if (::SHGetKnownFolderPath(rfid, 0, nullptr, &pathStr) == S_OK)
+    auto res = ::SHGetKnownFolderPath(rfid, 0, nullptr, &pathStr);
+    if (res == S_OK)
         path = pathStr;
     ::CoTaskMemFree(pathStr);
     if (path.empty())
-        throw std::runtime_error{"Failed to retrieve known folder path"};
+    {
+        std::ostringstream  oss;
+        oss << "Failed to retrieve known folder path. Folder attempt is " << idealName << ". Error code is " << res << std::endl;
+        throw std::runtime_error{oss.str()};
+    }
     return path;
 }
 
 
 fs::path homePath()
 {
-    return knownFolderPath(FOLDERID_Profile);
+    return knownFolderPath(FOLDERID_Profile, "Home (Profile)");
 }
 
 fs::path sharedLibraryBinaryPath()
@@ -60,18 +67,18 @@ fs::path sharedLibraryBinaryPath()
 
 fs::path bestDocumentsFolderPathFor(const std::string &productName)
 {
-    return knownFolderPath(FOLDERID_Documents) / productName;
+    return knownFolderPath(FOLDERID_Documents, "Documents") / productName;
 }
 
 fs::path bestLibrarySharedFolderPathFor(const std::string &productName, bool isUser)
 {
     if (!isUser)
     {
-        return knownFolderPath(FOLDERID_ProgramData) / productName;
+        return knownFolderPath(FOLDERID_ProgramData, "ProgramData") / productName;
     }
     else
     {
-        return knownFolderPath(FOLDERID_LocalAppData) / productName;
+        return knownFolderPath(FOLDERID_LocalAppData, "LocalAppData") / productName;
     }
 }
 }
