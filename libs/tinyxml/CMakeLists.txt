@@ -1,5 +1,5 @@
 
-add_library(tinyxml EXCLUDE_FROM_ALL
+add_library(tinyxml STATIC
         src/tinystr.cpp
         src/tinyxml.cpp
         src/tinyxmlerror.cpp
