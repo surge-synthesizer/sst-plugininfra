@@ -39,14 +39,18 @@ template <typename E, int maxE> struct Provider
         readDefaultsFile();
     }
 
-    std::string getUserDefaultValue(const E &key, const std::string &valueIfMissing)
+    std::string getUserDefaultValue(const E &key, const std::string &valueIfMissing,
+                                    bool potentiallyRead = true)
     {
         if (userPrefOverrides.find(key) != userPrefOverrides.end())
         {
             return userPrefOverrides[key].second;
         }
 
-        readDefaultsFile(false);
+        if (potentiallyRead)
+        {
+            readDefaultsFile(false);
+        }
 
         if (defaultsFileContents.find(key) != defaultsFileContents.end())
         {
@@ -61,14 +65,17 @@ template <typename E, int maxE> struct Provider
         return valueIfMissing;
     }
 
-    int getUserDefaultValue(const E &key, int valueIfMissing)
+    int getUserDefaultValue(const E &key, int valueIfMissing, bool potentiallyRead = true)
     {
         if (userPrefOverrides.find(key) != userPrefOverrides.end())
         {
             return userPrefOverrides[key].first;
         }
 
-        readDefaultsFile(false);
+        if (potentiallyRead)
+        {
+            readDefaultsFile(false);
+        }
 
         if (defaultsFileContents.find(key) != defaultsFileContents.end())
         {
@@ -82,9 +89,13 @@ template <typename E, int maxE> struct Provider
         return valueIfMissing;
     }
 
-    std::pair<int, int> getUserDefaultValue(const E &key, const std::pair<int, int> &valueIfMissing)
+    std::pair<int, int> getUserDefaultValue(const E &key, const std::pair<int, int> &valueIfMissing,
+                                            bool potentiallyRead = true)
     {
-        readDefaultsFile(false);
+        if (potentiallyRead)
+        {
+            readDefaultsFile(false);
+        }
 
         if (defaultsFileContents.find(key) != defaultsFileContents.end())
         {
