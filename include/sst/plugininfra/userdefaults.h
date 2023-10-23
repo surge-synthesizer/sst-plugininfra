@@ -39,7 +39,7 @@ template <typename E, int maxE> struct Provider
         readDefaultsFile();
     }
 
-    std::string getUserDefaultValue(const E &key, const std::string &valueIfMissing, ,
+    std::string getUserDefaultValue(const E &key, const std::string &valueIfMissing,
                                     bool potentiallyRead = true, bool potentiallyRead = true)
     {
         if (userPrefOverrides.find(key) != userPrefOverrides.end())
