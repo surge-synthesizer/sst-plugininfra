@@ -3,6 +3,7 @@
 #define SST_PLUGININFRA_CPUFEATURES_H
 
 #include <string>
+#include <cstdint>
 
 namespace sst
 {
