@@ -30,18 +30,15 @@ fs::path knownFolderPath(REFKNOWNFOLDERID rfid, const std::string &idealName)
     ::CoTaskMemFree(pathStr);
     if (path.empty())
     {
-        std::ostringstream  oss;
-        oss << "Failed to retrieve known folder path. Folder attempt is " << idealName << ". Error code is " << res << std::endl;
+        std::ostringstream oss;
+        oss << "Failed to retrieve known folder path. Folder attempt is " << idealName
+            << ". Error code is: " << std::system_category().message(res) << std::endl;
         throw std::runtime_error{oss.str()};
     }
     return path;
 }
 
-
-fs::path homePath()
-{
-    return knownFolderPath(FOLDERID_Profile, "Home (Profile)");
-}
+fs::path homePath() { return knownFolderPath(FOLDERID_Profile, "Home (Profile)"); }
 
 fs::path sharedLibraryBinaryPath()
 {
@@ -81,6 +78,6 @@ fs::path bestLibrarySharedFolderPathFor(const std::string &productName, bool isU
         return knownFolderPath(FOLDERID_LocalAppData, "LocalAppData") / productName;
     }
 }
-}
-}
-}
+} // namespace paths
+} // namespace plugininfra
+} // namespace sst
