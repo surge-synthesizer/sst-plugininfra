@@ -299,35 +299,51 @@ template <typename E, int maxE> struct Provider
         // Re-read the file in case another process] has updated it
         readDefaultsFile(true);
 
-        // Create the directory if we need it
-        fs::create_directories(defaultsDirectory);
+        try
+        {
+            // Create the directory if we need it
+            fs::create_directories(defaultsDirectory);
 
-        UserDefaultValue v;
-        v.key = key;
-        v.keystring = keysToStrings[key];
-        v.vpair = val;
-        v.type = type;
+            UserDefaultValue v;
+            v.key = key;
+            v.keystring = keysToStrings[key];
+            v.vpair = val;
+            v.type = type;
 
-        defaultsFileContents[v.key] = v;
-        return streamDefaultsFile();
+            defaultsFileContents[v.key] = v;
+            return streamDefaultsFile();
+        }
+        catch (const fs::filesystem_error &e)
+        {
+            errorHandler(e.what(), "UserDefaults");
+        }
+        return false;
     }
 
     bool storeUserDefaultValue(const E &key, const std::string &val,
                                enum UserDefaultValue::ValueType type)
     {
-        // Re-read the file in case another surge has updated it
-        readDefaultsFile(true);
+        try
+        {
+            // Re-read the file in case another surge has updated it
+            readDefaultsFile(true);
 
-        fs::create_directories(defaultsDirectory);
+            fs::create_directories(defaultsDirectory);
 
-        UserDefaultValue v;
-        v.key = key;
-        v.keystring = keysToStrings[key];
-        v.value = val;
-        v.type = type;
+            UserDefaultValue v;
+            v.key = key;
+            v.keystring = keysToStrings[key];
+            v.value = val;
+            v.type = type;
 
-        defaultsFileContents[v.key] = v;
-        return streamDefaultsFile();
+            defaultsFileContents[v.key] = v;
+            return streamDefaultsFile();
+        }
+        catch (const fs::filesystem_error &e)
+        {
+            errorHandler(e.what(), "UserDefaults");
+        }
+        return false;
     }
 
     std::map<E, UserDefaultValue> defaultsFileContents;
