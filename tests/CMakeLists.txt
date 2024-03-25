@@ -1,8 +1,8 @@
 add_executable(sst-plugininfra-tests)
 target_include_directories(sst-plugininfra-tests PRIVATE tests)
-target_link_libraries(sst-plugininfra-tests PUBLIC sst-plugininfra sst-plugininfra::filesystem sst-plugininfra::tinyxml)
+target_link_libraries(sst-plugininfra-tests PUBLIC sst-plugininfra sst-plugininfra::filesystem sst-plugininfra::libzip sst-plugininfra::tinyxml)
 target_sources(sst-plugininfra-tests PRIVATE
-        tests.cpp)
+        tests.cpp ziptests.cpp)
 if (NOT WIN32 AND NOT APPLE)
     target_sources(sst-plugininfra-tests PRIVATE tests_linux.cpp)
 endif ()
@@ -33,4 +33,4 @@ add_custom_command(TARGET sst-all-tests
         COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:dumppaths>" test-binary
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/libs/tinyxml/test/utf8test.xml test-binary
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/libs/tinyxml/test/utf8testverify.xml test-binary
-        )
+)
