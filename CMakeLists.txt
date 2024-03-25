@@ -21,6 +21,9 @@ if (${SST_PLUGININFRA_PROVIDE_STRNATCMP})
 endif ()
 
 if (${SST_PLUGININFRA_PROVIDE_LIBZIP})
+    # This is basically the pain of windows not having a zlib
+    # and libzip using find_package so this fakes out an install
+    # in the build dir at configure time and then points at it
     set(BUILD_SHARED_LIBS OFF)
 
     if (WIN32)
@@ -41,7 +44,7 @@ if (${SST_PLUGININFRA_PROVIDE_LIBZIP})
                 ERROR_VARIABLE E)
 
         execute_process(WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-                COMMAND ${CMAKE_COMMAND} -E copy "libs/zlib/*.h" "${ZLIB_BUILD}"
+                COMMAND ${CMAKE_COMMAND} -E copy_directory "libs/zlib" "${ZLIB_BUILD}"
                 RESULT_VARIABLE R
                 OUTPUT_VARIABLE O
                 ERROR_VARIABLE E)
