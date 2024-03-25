@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 option(SST_PLUGININFRA_FILESYSTEM_FORCE_PLATFORM "Use std::filesystem from the platform headers no matter what" OFF)
 option(SST_PLUGININFRA_PROVIDE_TINYXML "Provide tinyxml as a target" ON)
 option(SST_PLUGININFRA_PROVIDE_STRNATCMP "Provide strnatcmp as a target" ON)
-option(SST_PLUGININFRA_PROVIDE_LIBZIP "Provide libzip" ON)
+option(SST_PLUGININFRA_PROVIDE_LIBZIP "Provide libzip" OFF)
 
 add_subdirectory(libs/filesystem)
 if (${SST_PLUGININFRA_PROVIDE_TINYXML})
@@ -39,15 +39,24 @@ if (${SST_PLUGININFRA_PROVIDE_LIBZIP})
                 RESULT_VARIABLE R
                 OUTPUT_VARIABLE O
                 ERROR_VARIABLE E)
+
+        execute_process(WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+                COMMAND ${CMAKE_COMMAND} -E copy "libs/zlib/*.h" "${ZLIB_BUILD}"
+                RESULT_VARIABLE R
+                OUTPUT_VARIABLE O
+                ERROR_VARIABLE E)
         if (${R})
-            message(FATAL_ERROR "Could not build zlib - ${R} ${E}")
+            message(FATAL_ERROR "Could not copy headers - ${R} ${E}")
         endif ()
         set(ZLIB_INCLUDE_DIR ${ZLIB_BUILD})
         set(ZLIB_LIBRARY ${ZLIB_BUILD})
     endif ()
     add_subdirectory(libs/libzip)
     if (WIN32)
-        target_include_directories(zip PUBLIC ${ZLIB_BUILD})
+        target_include_directories(zip PUBLIC
+                ${ZLIB_BUILD}
+                ${CMAKE_CURRENT_LIST_DIR}/libs/zlib
+        )
     endif ()
     add_library(${PROJECT_NAME}::libzip ALIAS zip)
 endif ()
