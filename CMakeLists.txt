@@ -22,8 +22,28 @@ endif ()
 
 if (${SST_PLUGININFRA_PROVIDE_LIBZIP})
     set(BUILD_SHARED_LIBS OFF)
+
     if (WIN32)
-        set(ZLIB_LINK_LIBRARY_NAME "zlib")
+        set(ZLIB_BUILD ${CMAKE_BINARY_DIR}/zlibcustom)
+        message(STATUS "Executing ZLib Build Process")
+        execute_process(WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+                COMMAND ${CMAKE_COMMAND} -B "${ZLIB_BUILD}" -DBUILD_SHARED_LIBS=OFF -S libs/zlib
+                RESULT_VARIABLE R
+                OUTPUT_VARIABLE O
+                ERROR_VARIABLE E)
+        if (${R})
+            message(FATAL_ERROR "Could not configure zlib - ${E}")
+        endif ()
+        execute_process(WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+                COMMAND ${CMAKE_COMMAND} --build "${ZLIB_BUILD}"
+                RESULT_VARIABLE R
+                OUTPUT_VARIABLE O
+                ERROR_VARIABLE E)
+        if (${R})
+            message(FATAL_ERROR "Could not build zlib - ${R} ${E}")
+        endif ()
+        set(ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/libs/zlib)
+        set(ZLIB_LIBRARY ${ZLIB_BUILD})
     endif ()
     add_subdirectory(libs/libzip)
     add_library(${PROJECT_NAME}::libzip ALIAS zip)
@@ -58,12 +78,12 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY VISIBILITY_INLINES_HIDDEN ON)
 
 
 get_directory_property(parent_dir PARENT_DIRECTORY)
-if ("${parent_dir}" STREQUAL "")
+if (" ${parent_dir} " STREQUAL " ")
     set(is_toplevel 1)
 else ()
     set(is_toplevel 0)
 endif ()
-option(SST_PLUGININFRA_BUILD_TESTS "Add targets for building and running sst-cpputils tests" ${is_toplevel})
+option(SST_PLUGININFRA_BUILD_TESTS " Add targets for building and running sst-cpputils tests " ${is_toplevel})
 
 if (SST_PLUGININFRA_BUILD_TESTS)
     add_subdirectory(tests)

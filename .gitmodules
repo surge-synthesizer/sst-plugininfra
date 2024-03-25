@@ -4,3 +4,6 @@
 [submodule "libs/libzip"]
 	path = libs/libzip
 	url = https://github.com/nih-at/libzip.git
+[submodule "libs/zlib"]
+	path = libs/zlib
+	url = https://github.com/madler/zlib.git
