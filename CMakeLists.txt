@@ -51,8 +51,16 @@ if (${SST_PLUGININFRA_PROVIDE_LIBZIP})
         if (${R})
             message(FATAL_ERROR "Could not copy headers - ${R} ${E}")
         endif ()
+
+
+        execute_process(WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+                COMMAND dir "${ZLIB_BUILD}"
+                RESULT_VARIABLE R
+                OUTPUT_VARIABLE O
+                ERROR_VARIABLE E)
+        message(STATUS "BUILT ${O}")
         set(ZLIB_INCLUDE_DIR ${ZLIB_BUILD})
-        set(ZLIB_LIBRARY ${ZLIB_BUILD})
+        set(ZLIB_LIBRARY ${ZLIB_BUILD}/zlib.lib)
     endif ()
     add_subdirectory(libs/libzip)
     if (WIN32)
