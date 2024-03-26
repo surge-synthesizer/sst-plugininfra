@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 option(SST_PLUGININFRA_FILESYSTEM_FORCE_PLATFORM "Use std::filesystem from the platform headers no matter what" OFF)
 option(SST_PLUGININFRA_PROVIDE_TINYXML "Provide tinyxml as a target" ON)
 option(SST_PLUGININFRA_PROVIDE_STRNATCMP "Provide strnatcmp as a target" ON)
-option(SST_PLUGININFRA_PROVIDE_LIBZIP "Provide libzip" OFF)
+option(SST_PLUGININFRA_PROVIDE_MINIZ "Provide libzip" OFF)
 
 add_subdirectory(libs/filesystem)
 if (${SST_PLUGININFRA_PROVIDE_TINYXML})
