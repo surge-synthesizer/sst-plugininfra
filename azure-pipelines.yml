@@ -31,18 +31,18 @@ jobs:
 
       - bash: |
           git submodule update --init --recursive
-          cmake -Bbuild -DCMAKE_BUILD_TYPE=Release
-          cmake --build build --config Release
+          cmake -Bbuild -DCMAKE_BUILD_TYPE=Release -DSST_PLUGININFRA_PROVIDE_MINIZ=TRUE -DSST_PLUGININFRA_BUILD_TESTS=TRUE
+          cmake --build build --config Release --target sst-all-tests
         displayName: Build Tests
 
       - bash: |
-          cmake -Bbuild_ghc -DCMAKE_BUILD_TYPE=Debug -DSST_PLUGININFRA_FILESYSTEM_FORCE_GHC=ON
+          cmake -Bbuild_ghc -DCMAKE_BUILD_TYPE=Debug -DSST_PLUGININFRA_PROVIDE_MINIZ=TRUE  -DSST_PLUGININFRA_FILESYSTEM_FORCE_GHC=ON
           cmake --build build_ghc --config Debug
         displayName: Build w GHC On (lin/mac only)
         condition: not(variables.isWindows)
 
       - bash: |
-          cmake -Bbuild_pffs -DCMAKE_BUILD_TYPE=Debug -DSST_PLUGININFRA_FILESYSTEM_FORCE_PLATFORM=ON
+          cmake -Bbuild_pffs -DCMAKE_BUILD_TYPE=Debug -DSST_PLUGININFRA_FILESYSTEM_FORCE_PLATFORM=ON -DSST_PLUGININFRA_PROVIDE_MINIZ=TRUE 
           cmake --build build_pffs --config Debug
         displayName: Build w Platform FS On
 

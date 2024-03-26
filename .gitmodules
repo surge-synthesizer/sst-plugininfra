@@ -1,3 +1,6 @@
 [submodule "libs/filesystem/filesystem"]
 	path = libs/filesystem/ghc-filesystem
 	url = https://github.com/gulrak/filesystem.git
+[submodule "libs/miniz"]
+	path = libs/miniz
+	url = https://github.com/richgel999/miniz

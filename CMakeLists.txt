@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 option(SST_PLUGININFRA_FILESYSTEM_FORCE_PLATFORM "Use std::filesystem from the platform headers no matter what" OFF)
 option(SST_PLUGININFRA_PROVIDE_TINYXML "Provide tinyxml as a target" ON)
 option(SST_PLUGININFRA_PROVIDE_STRNATCMP "Provide strnatcmp as a target" ON)
+option(SST_PLUGININFRA_PROVIDE_MINIZ "Provide libzip" OFF)
 
 add_subdirectory(libs/filesystem)
 if (${SST_PLUGININFRA_PROVIDE_TINYXML})
@@ -17,6 +18,15 @@ endif ()
 if (${SST_PLUGININFRA_PROVIDE_STRNATCMP})
     add_subdirectory(libs/strnatcmp)
     add_library(${PROJECT_NAME}::strnatcmp ALIAS strnatcmp)
+endif ()
+
+if (${SST_PLUGININFRA_PROVIDE_MINIZ})
+    # This is basically the pain of windows not having a zlib
+    # and libzip using find_package so this fakes out an install
+    # in the build dir at configure time and then points at it
+    set(BUILD_SHARED_LIBS OFF)
+    add_subdirectory(libs/miniz)
+    add_library(${PROJECT_NAME}::miniz ALIAS miniz)
 endif ()
 
 configure_file(src/paths_subst.cpp.in ${CMAKE_BINARY_DIR}/gen/paths_subst.cpp)
@@ -53,7 +63,7 @@ if ("${parent_dir}" STREQUAL "")
 else ()
     set(is_toplevel 0)
 endif ()
-option(SST_PLUGININFRA_BUILD_TESTS "Add targets for building and running sst-cpputils tests" ${is_toplevel})
+option(SST_PLUGININFRA_BUILD_TESTS " Add targets for building and running sst-cpputils tests " ${is_toplevel})
 
 if (SST_PLUGININFRA_BUILD_TESTS)
     add_subdirectory(tests)

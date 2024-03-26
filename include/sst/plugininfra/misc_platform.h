@@ -1,9 +1,19 @@
-//
-// Created by Paul Walker on 2/13/22.
-//
+/*
+ * sst-plugininfra - an open source library of plugin infrastructure
+ * built by Surge Synth Team.
+ *
+ * Copyright 2018-2024, various authors, as described in the GitHub
+ * transaction log.
+ *
+ * sst-effects is released under the MIT License. It has subordinate
+ * libraries with licenses as described in libs/
+ *
+ * All source in sst-plugininfra available at
+ * https://github.com/surge-synthesizer/sst-plugininfra
+ */
 
-#ifndef SST_PLUGININFRA_OTHER_PLATFORM_H
-#define SST_PLUGININFRA_OTHER_PLATFORM_H
+#ifndef INCLUDE_SST_PLUGININFRA_MISC_PLATFORM_H
+#define INCLUDE_SST_PLUGININFRA_MISC_PLATFORM_H
 
 namespace sst
 {
