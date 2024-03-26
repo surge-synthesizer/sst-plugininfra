@@ -30,7 +30,7 @@ if (${SST_PLUGININFRA_PROVIDE_LIBZIP})
         set(ZLIB_BUILD ${CMAKE_BINARY_DIR}/zlibcustom)
         message(STATUS "Executing ZLib Build Process")
         execute_process(WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-                COMMAND ${CMAKE_COMMAND} -B "${ZLIB_BUILD}" -DBUILD_SHARED_LIBS=OFF -S libs/zlib
+                COMMAND ${CMAKE_COMMAND} -B "${ZLIB_BUILD}" -DBUILD_SHARED_LIBS=FALSE -S libs/zlib -DCMAKE_BUILD_TYPE=Release -Ax64
                 RESULT_VARIABLE R
                 OUTPUT_VARIABLE O
                 ERROR_VARIABLE E)
@@ -38,7 +38,7 @@ if (${SST_PLUGININFRA_PROVIDE_LIBZIP})
             message(FATAL_ERROR "Could not configure zlib - ${E}")
         endif ()
         execute_process(WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-                COMMAND ${CMAKE_COMMAND} --build "${ZLIB_BUILD}"
+                COMMAND ${CMAKE_COMMAND} --build "${ZLIB_BUILD}" --config Release --target zlibstatic
                 RESULT_VARIABLE R
                 OUTPUT_VARIABLE O
                 ERROR_VARIABLE E)
@@ -52,23 +52,10 @@ if (${SST_PLUGININFRA_PROVIDE_LIBZIP})
             message(FATAL_ERROR "Could not copy headers - ${R} ${E}")
         endif ()
 
-
-        execute_process(WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-                COMMAND dir "${ZLIB_BUILD}"
-                RESULT_VARIABLE R
-                OUTPUT_VARIABLE O
-                ERROR_VARIABLE E)
-        message(STATUS "BUILT ${O}")
         set(ZLIB_INCLUDE_DIR ${ZLIB_BUILD})
-        set(ZLIB_LIBRARY ${ZLIB_BUILD}/zlib.lib)
+        set(ZLIB_LIBRARY ${ZLIB_BUILD}/Release/zlibstatic.lib)
     endif ()
     add_subdirectory(libs/libzip)
-    if (WIN32)
-        target_include_directories(zip PUBLIC
-                ${ZLIB_BUILD}
-                ${CMAKE_CURRENT_LIST_DIR}/libs/zlib
-        )
-    endif ()
     add_library(${PROJECT_NAME}::libzip ALIAS zip)
 endif ()
 configure_file(src/paths_subst.cpp.in ${CMAKE_BINARY_DIR}/gen/paths_subst.cpp)
@@ -100,7 +87,7 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY VISIBILITY_INLINES_HIDDEN ON)
 
 
 get_directory_property(parent_dir PARENT_DIRECTORY)
-if (" ${parent_dir} " STREQUAL " ")
+if ("${parent_dir}" STREQUAL "")
     set(is_toplevel 1)
 else ()
     set(is_toplevel 0)
