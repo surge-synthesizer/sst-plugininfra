@@ -31,7 +31,7 @@ jobs:
 
       - bash: |
           git submodule update --init --recursive
-          cmake -Bbuild -DCMAKE_BUILD_TYPE=Release -DSST_PLUGININFRA_PROVIDE_LIBZIP=TRUE -DSST_PLUGININFRA_BUILD_TESTS=TRUE
+          cmake -Bbuild -DCMAKE_BUILD_TYPE=Release -DSST_PLUGININFRA_PROVIDE_MINI=TRUE -DSST_PLUGININFRA_BUILD_TESTS=TRUE
           cmake --build build --config Release --target sst-all-tests
         displayName: Build Tests
 

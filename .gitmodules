@@ -1,9 +1,6 @@
 [submodule "libs/filesystem/filesystem"]
 	path = libs/filesystem/ghc-filesystem
 	url = https://github.com/gulrak/filesystem.git
-[submodule "libs/libzip"]
-	path = libs/libzip
-	url = https://github.com/nih-at/libzip.git
-[submodule "libs/zlib"]
-	path = libs/zlib
-	url = https://github.com/madler/zlib.git
+[submodule "libs/miniz"]
+	path = libs/miniz
+	url = https://github.com/richgel999/miniz

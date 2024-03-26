@@ -20,44 +20,15 @@ if (${SST_PLUGININFRA_PROVIDE_STRNATCMP})
     add_library(${PROJECT_NAME}::strnatcmp ALIAS strnatcmp)
 endif ()
 
-if (${SST_PLUGININFRA_PROVIDE_LIBZIP})
+if (${SST_PLUGININFRA_PROVIDE_MINIZ})
     # This is basically the pain of windows not having a zlib
     # and libzip using find_package so this fakes out an install
     # in the build dir at configure time and then points at it
     set(BUILD_SHARED_LIBS OFF)
-
-    if (WIN32)
-        set(ZLIB_BUILD ${CMAKE_BINARY_DIR}/zlibcustom)
-        message(STATUS "Executing ZLib Build Process")
-        execute_process(WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-                COMMAND ${CMAKE_COMMAND} -B "${ZLIB_BUILD}" -DBUILD_SHARED_LIBS=FALSE -S libs/zlib -DCMAKE_BUILD_TYPE=Release -Ax64
-                RESULT_VARIABLE R
-                OUTPUT_VARIABLE O
-                ERROR_VARIABLE E)
-        if (${R})
-            message(FATAL_ERROR "Could not configure zlib - ${E}")
-        endif ()
-        execute_process(WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-                COMMAND ${CMAKE_COMMAND} --build "${ZLIB_BUILD}" --config Release --target zlibstatic
-                RESULT_VARIABLE R
-                OUTPUT_VARIABLE O
-                ERROR_VARIABLE E)
-
-        execute_process(WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-                COMMAND ${CMAKE_COMMAND} -E copy_directory "libs/zlib" "${ZLIB_BUILD}"
-                RESULT_VARIABLE R
-                OUTPUT_VARIABLE O
-                ERROR_VARIABLE E)
-        if (${R})
-            message(FATAL_ERROR "Could not copy headers - ${R} ${E}")
-        endif ()
-
-        set(ZLIB_INCLUDE_DIR ${ZLIB_BUILD})
-        set(ZLIB_LIBRARY ${ZLIB_BUILD}/Release/zlibstatic.lib)
-    endif ()
-    add_subdirectory(libs/libzip)
-    add_library(${PROJECT_NAME}::libzip ALIAS zip)
+    add_subdirectory(libs/miniz)
+    add_library(${PROJECT_NAME}::miniz ALIAS miniz)
 endif ()
+
 configure_file(src/paths_subst.cpp.in ${CMAKE_BINARY_DIR}/gen/paths_subst.cpp)
 
 add_library(${PROJECT_NAME} STATIC EXCLUDE_FROM_ALL ${CMAKE_BINARY_DIR}/gen/paths_subst.cpp)
