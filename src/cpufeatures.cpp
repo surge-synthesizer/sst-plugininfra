@@ -13,7 +13,8 @@
  */
 #include "sst/plugininfra/cpufeatures.h"
 
-#if defined(__i386__) || defined(__x86_64__)
+#if defined(__SSE2__) || defined(_M_AMD64) || defined(_M_X64) ||                                   \
+    (defined(_M_IX86_FP) && _M_IX86_FP >= 2) || defined(__i386__) || defined(__x86_64__)
 #define USING_X86 1
 #include <xmmintrin.h>
 #endif
@@ -30,6 +31,10 @@
 #ifdef _WIN32
 #include <intrin.h>
 #define cpuid(info, x) __cpuidex(info, x, 0)
+
+#if !USING_X86
+#error "Windows only works on X86 right now"
+#endif
 #else
 #if LINUX && USING_X86
 #ifdef __GNUC__
