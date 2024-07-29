@@ -1,6 +1,6 @@
 message(STATUS "Building plugininfra tests")
 add_executable(sst-plugininfra-tests)
-target_include_directories(sst-plugininfra-tests PRIVATE tests)
+target_include_directories(sst-plugininfra-tests PRIVATE tests ../libs)
 target_link_libraries(sst-plugininfra-tests PUBLIC sst-plugininfra sst-plugininfra::filesystem sst-plugininfra::miniz sst-plugininfra::tinyxml)
 target_sources(sst-plugininfra-tests PRIVATE
         tests.cpp ziptests.cpp)
