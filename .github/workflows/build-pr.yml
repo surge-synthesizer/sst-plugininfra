@@ -1,0 +1,69 @@
+name: PR
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build_test:
+    name: Test ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            name: linux
+          - os: macos-latest
+            name: mac
+          - os: windows-latest
+            name: win
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Build Tests
+        run: |
+          cmake -S . -B ./build -DCMAKE_BUILD_TYPE=Release -DSST_PLUGININFRA_PROVIDE_MINIZ=TRUE -DSST_PLUGININFRA_BUILD_TESTS=TRUE
+          cmake --build ./build --target sst-all-tests
+
+      - name: Run Test
+        run: |
+          pushd ./build/test-binary 
+          ./sst-plugininfra-tests
+          ./sst-tixml-tests
+          ./dumppaths
+
+  build_fs_test:
+    name: FS Test ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            name: linux-ghc
+            cmakeFS: -DSST_PLUGININFRA_FILESYSTEM_FORCE_GHC=ON
+          - os: macos-latest
+            name: mac-ghc
+            cmakeFS: -DSST_PLUGININFRA_FILESYSTEM_FORCE_GHC=ON
+          - os: ubuntu-latest
+            name: linux-native
+            cmakeFS: -DSST_PLUGININFRA_FILESYSTEM_FORCE_PLATFORM=ON
+          - os: macos-latest
+            name: mac-native
+            cmakeFS: -DSST_PLUGININFRA_FILESYSTEM_FORCE_PLATFORM=ON
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Build Library
+        run: |
+          cmake -S . -B ./build -DCMAKE_BUILD_TYPE=Debug -DSST_PLUGININFRA_PROVIDE_MINIZ=TRUE ${{ matrix.cmakeFS }}
+          cmake --build ./build 
+

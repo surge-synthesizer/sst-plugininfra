@@ -31,7 +31,6 @@ TEST_CASE("Can Unzip File")
     auto zipIn = p / "tests" / "three_cpp_files.zip";
     std::cout << "Reading rrom " << zipIn.u8string() << std::endl;
 
-
     mz_zip_archive zip_archive;
     memset(&zip_archive, 0, sizeof(zip_archive));
 
@@ -53,5 +52,4 @@ TEST_CASE("Can Unzip File")
         if (i == 2)
             REQUIRE(std::string(file_stat.m_filename) == "tests_linux.cpp");
     }
-
 }
