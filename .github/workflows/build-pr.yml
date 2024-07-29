@@ -28,7 +28,7 @@ jobs:
       - name: Build Tests
         run: |
           cmake -S . -B ./build -DCMAKE_BUILD_TYPE=Release -DSST_PLUGININFRA_PROVIDE_MINIZ=TRUE -DSST_PLUGININFRA_BUILD_TESTS=TRUE
-          cmake --build ./build --config Release sst-all-tests
+          cmake --build ./build --target sst-all-tests
 
       - name: Run Test
         run: |
@@ -62,8 +62,8 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Build Tests
+      - name: Build Library
         run: |
-          cmake -S . -B ./build -DCMAKE_BUILD_TYPE=Debug -DSST_PLUGININFRA_PROVIDE_MINIZ=TRUE -DSST_PLUGININFRA_BUILD_TESTS=TRUE
+          cmake -S . -B ./build -DCMAKE_BUILD_TYPE=Debug -DSST_PLUGININFRA_PROVIDE_MINIZ=TRUE ${{ matrix.cmakeFS }}
           cmake --build ./build 
 
