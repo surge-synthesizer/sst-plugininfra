@@ -15,8 +15,12 @@
 
 #if defined(__SSE2__) || defined(_M_AMD64) || defined(_M_X64) ||                                   \
     (defined(_M_IX86_FP) && _M_IX86_FP >= 2) || defined(__i386__) || defined(__x86_64__)
+#if defined(_M_ARM64EC)
+#include <intrin.h>
+#else
 #define USING_X86 1
 #include <xmmintrin.h>
+#endif
 #endif
 
 #if MAC
@@ -28,13 +32,14 @@
 #include <fstream>
 #endif
 
+#if WINDOWS
+#include <windows.h>
+#endif
+
 #ifdef _WIN32
 #include <intrin.h>
 #define cpuid(info, x) __cpuidex(info, x, 0)
 
-#if !USING_X86
-#error "Windows only works on X86 right now"
-#endif
 #else
 #if LINUX && USING_X86
 #ifdef __GNUC__
@@ -80,6 +85,24 @@ std::string brand()
     }
 
 #elif WINDOWS
+#if defined(_M_ARM64) || defined(_M_ARM64EC)
+    arch = "unknown windows arm";
+    const char *csName = "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0";
+    HKEY hKey;
+    DWORD gotType, gotSize = 64;
+    char inBuffer[64];
+    if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, csName, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
+    {
+        if (!RegQueryValueExA(hKey, "ProcessorNameString", nullptr, &gotType, (PBYTE)inBuffer,
+                              &gotSize))
+        {
+            if (gotType == REG_SZ && strlen(inBuffer))
+            {
+                arch = inBuffer;
+            }
+        }
+    }
+#else
     std::string platform = "Windows";
 
     int CPUInfo[4] = {-1};
@@ -100,6 +123,7 @@ std::string brand()
             memcpy(CPUBrandString + 32, CPUInfo, sizeof(CPUInfo));
     }
     arch = CPUBrandString;
+#endif
 #elif LINUX
     std::string platform = "Linux";
 
@@ -132,7 +156,7 @@ std::string brand()
 
 bool isArm()
 {
-#if defined(__arm__) || defined(__aarch64__)
+#if defined(__arm__) || defined(__aarch64__) || defined(_M_ARM64) || defined(_M_ARM64EC)
     return true;
 #else
     return false;
