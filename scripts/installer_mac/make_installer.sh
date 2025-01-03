@@ -73,7 +73,14 @@ build_flavor()
 
     if [[ ! -z $MAC_SIGNING_CERT ]]; then
       [[ -z $MAC_INSTALLING_CERT ]] && echo "You need an installing cert too " && exit 2
-      codesign --force -s "$MAC_SIGNING_CERT" -o runtime --deep "$workdir/$flavorprod"
+
+      entflag=""
+      if [[ -f ${RESOURCESDIR}/entitlements.plist ]]; then
+        entflag="--entitlements ${RESOURCESDIR}/entitlements.plist"
+        echo "Adding entitlements flag $entflag"
+      fi
+      echo codesign --force -s "$MAC_SIGNING_CERT" -o runtime $entflag --deep "$workdir/$flavorprod" || exit 7
+      codesign --force -s "$MAC_SIGNING_CERT" -o runtime $entflag --deep "$workdir/$flavorprod" || exit 7
       codesign -vvv "$workdir/$flavorprod"
 
       pkgbuild --sign "$MAC_INSTALLING_CERT" --root $workdir --identifier $ident --version $VERSION --install-location "$loc" "$TMPDIR/${PRODUCTFILE}_${flavor}.pkg" $sca || exit 1
