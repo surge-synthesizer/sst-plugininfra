@@ -1,7 +1,7 @@
 # vi:set sw=2 et:
 project(strnatcmp)
 
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} STATIC
         strnatcmp.cpp
         )
 add_library(surge::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
