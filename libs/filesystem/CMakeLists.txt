@@ -18,7 +18,7 @@ function(use_ghc_fs)
     string(REPLACE "__attribute__((visibility(\"default\")))" "" HEADER_DATA "${HEADER_DATA}")
     file(WRITE "${HEADER_FILE}" ${HEADER_DATA})
 
-    add_library(${PROJECT_NAME} src/ghc-filesystem.cpp "${HEADER_FILE}")
+    add_library(${PROJECT_NAME} STATIC src/ghc-filesystem.cpp "${HEADER_FILE}")
     generate_header("\"filesystem/ghc-filesystem.h\"" "ghc::filesystem" "SST_PLUGINFRA_GHC_FS")
     target_compile_definitions(${PROJECT_NAME}
             INTERFACE GHC_FILESYSTEM_FWD
