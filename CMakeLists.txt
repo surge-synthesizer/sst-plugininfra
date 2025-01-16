@@ -8,6 +8,7 @@ option(SST_PLUGININFRA_FILESYSTEM_FORCE_PLATFORM "Use std::filesystem from the p
 option(SST_PLUGININFRA_PROVIDE_TINYXML "Provide tinyxml as a target" ON)
 option(SST_PLUGININFRA_PROVIDE_STRNATCMP "Provide strnatcmp as a target" ON)
 option(SST_PLUGININFRA_PROVIDE_MINIZ "Provide libzip" OFF)
+option(SST_PLUGININFRA_PROVIDE_PATCHBASE "Provide patchbase" OFF)
 
 add_subdirectory(libs/filesystem)
 if (${SST_PLUGININFRA_PROVIDE_TINYXML})
@@ -28,6 +29,20 @@ if (${SST_PLUGININFRA_PROVIDE_MINIZ})
     add_subdirectory(libs/miniz)
     add_library(${PROJECT_NAME}::miniz ALIAS miniz)
 endif ()
+
+if (${SST_PLUGININFRA_PROVIDE_PATCHBASE})
+    if (NOT TARGET sst-basic-blocks)
+        message(FATAL_ERROR "To provide PatchBase, PLUGININFRA needs basic blocks")
+    endif()
+    if (NOT TARGET tinyxml)
+        message(FATAL_ERROR "To provide PatchBase, PLUGININFRA needs tinyxml")
+    endif()
+    add_library(patchbase INTERFACE)
+    target_include_directories(patchbase INTERFACE include)
+    target_compile_definitions(patchbase INTERFACE SST_PLUGININFRA_PATCHBASE=1)
+    target_link_libraries(patchbase INTERFACE tinyxml sst-basic-blocks)
+    add_library(${PROJECT_NAME}::patchbase ALIAS patchbase)
+endif()
 
 configure_file(src/paths_subst.cpp.in ${CMAKE_BINARY_DIR}/gen/paths_subst.cpp)
 
