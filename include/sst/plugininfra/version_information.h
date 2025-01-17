@@ -37,8 +37,9 @@ struct VersionInformation
     static const char *project_version_minor;
     static const char *project_version_patch;
     static const char *project_version_tweak;
-    static const char *project_version;      // major.minor.patch
-    static const char *project_version_full; // major.minor.patch.tweak
+    static const char *project_version;          // major.minor.patch
+    static const char *project_version_and_hash; // major.minor.patch.hash
+    static const char *project_version_full;     // major.minor.patch.tweak
 
     // These are all UTC times
     static const char *build_date;

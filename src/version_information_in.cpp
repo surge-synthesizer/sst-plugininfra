@@ -19,6 +19,7 @@ static_assert("@GIT_COMMIT_HASH@"[0] != '\0',
               "this library");
 namespace sst::plugininfra
 {
+// clang-format off
 const char *VersionInformation::git_commit_hash{"@GIT_COMMIT_HASH@"};
 const char *VersionInformation::git_branch{"@GIT_BRANCH@"};
 const char *VersionInformation::git_tag{"@GIT_TAG@"};
@@ -30,9 +31,11 @@ const char *VersionInformation::project_version_patch{"@CMAKE_PROJECT_VERSION_PA
 const char *VersionInformation::project_version_tweak{"@CMAKE_PROJECT_VERSION_TWEAK@"};
 const char *VersionInformation::project_version{
     "@CMAKE_PROJECT_VERSION_MAJOR@.@CMAKE_PROJECT_VERSION_MINOR@.@CMAKE_PROJECT_VERSION_PATCH@"};
+const char *VersionInformation::project_version_and_hash{
+    "@CMAKE_PROJECT_VERSION_MAJOR@.@CMAKE_PROJECT_VERSION_MINOR@.@CMAKE_PROJECT_VERSION_PATCH@.@GIT_COMMIT_HASH@"};
+
 const char *VersionInformation::project_version_full{
-    "@CMAKE_PROJECT_VERSION_MAJOR@.@CMAKE_PROJECT_VERSION_MINOR@.@CMAKE_PROJECT_VERSION_PATCH@.@"
-    "CMAKE_PROJECT_VERSION_TWEAK@"};
+    "@CMAKE_PROJECT_VERSION_MAJOR@.@CMAKE_PROJECT_VERSION_MINOR@.@CMAKE_PROJECT_VERSION_PATCH@.@CMAKE_PROJECT_VERSION_TWEAK@"};
 
 const char *VersionInformation::cmake_source_dir{"@CMAKE_SOURCE_DIR@"};
 const char *VersionInformation::cmake_binary_dir{"@CMAKE_BINARY_DIR@"};
@@ -46,4 +49,5 @@ const char *VersionInformation::cmake_system_name{"@CMAKE_SYSTEM_NAME@"};
 const char *VersionInformation::build_date{"@SSTPI_VERS_BUILD_DATE@"};
 const char *VersionInformation::build_year{"@SSTPI_VERS_BUILD_YEAR@"};
 const char *VersionInformation::build_time{"@SSTPI_VERS_BUILD_TIME@"};
+// clang-format on
 } // namespace sst::plugininfra
