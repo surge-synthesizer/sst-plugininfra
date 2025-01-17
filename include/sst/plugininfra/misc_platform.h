@@ -22,7 +22,8 @@ namespace plugininfra
 namespace misc_platform
 {
 bool isDarkMode();
-}
+void allocateConsole(); // a mac/lin no-op but on windows it does stuff
+} // namespace misc_platform
 } // namespace plugininfra
 } // namespace sst
 
