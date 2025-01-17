@@ -13,7 +13,7 @@
  */
 
 #include <sst/plugininfra/version_information.h>
-#include <string>
+#include <cstring>
 #include <iostream>
 
 int main(int argc, char **argv)
