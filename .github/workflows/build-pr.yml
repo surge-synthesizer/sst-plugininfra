@@ -36,6 +36,8 @@ jobs:
           ./sst-plugininfra-tests
           ./sst-tixml-tests
           ./dumppaths
+          ./version_info_test
+          ./cpufeatures
 
   build_fs_test:
     name: FS Test ${{ matrix.name }}

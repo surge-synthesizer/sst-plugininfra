@@ -12,7 +12,7 @@ set_property(TARGET sst-plugininfra-tests PROPERTY VISIBILITY_INLINES_HIDDEN ON)
 
 
 add_executable(sst-tixml-tests)
-target_sources(sst-tixml-tests PRIVATE ${CMAKE_SOURCE_DIR}/libs/tinyxml/test/xmltest.cpp)
+target_sources(sst-tixml-tests PRIVATE ..//libs/tinyxml/test/xmltest.cpp)
 target_link_libraries(sst-tixml-tests PRIVATE tinyxml)
 
 add_executable(dumppaths)
@@ -24,10 +24,15 @@ add_executable(cpufeatures)
 target_sources(cpufeatures PRIVATE cpufeatures.cpp)
 target_link_libraries(cpufeatures sst-plugininfra)
 
+add_executable(version_info_test)
+target_sources(version_info_test PRIVATE version_infro_tests.cpp)
+target_link_libraries(version_info_test sst-plugininfra::version_information)
+
 add_custom_target(sst-all-tests ALL)
 add_dependencies(sst-all-tests dumppaths)
 add_dependencies(sst-all-tests sst-tixml-tests)
 add_dependencies(sst-all-tests sst-plugininfra-tests)
+add_dependencies(sst-all-tests version_info_test)
 
 add_custom_command(TARGET sst-all-tests
         POST_BUILD
@@ -38,6 +43,7 @@ add_custom_command(TARGET sst-all-tests
         COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:sst-tixml-tests>" test-binary
         COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:dumppaths>" test-binary
         COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:cpufeatures>" test-binary
+        COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:version_info_test>" test-binary
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/libs/tinyxml/test/utf8test.xml test-binary
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/libs/tinyxml/test/utf8testverify.xml test-binary
 )
