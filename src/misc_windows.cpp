@@ -15,6 +15,8 @@
 #include <sst/plugininfra/misc_platform.h>
 #include <tchar.h>
 #include <windows.h>
+#include <iostream>
+#include <stdio.h>
 
 namespace sst
 {
@@ -34,6 +36,19 @@ bool isDarkMode()
         return false;
     }
     return true;
+}
+
+void allocateConsole()
+{
+    static FILE *confp{nullptr};
+    AllocConsole();
+    freopen_s(&confp, "CONOUT$", "w", stdout);
+    HANDLE hConOut =
+        CreateFile("CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+                   NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    SetStdHandle(STD_OUTPUT_HANDLE, hConOut);
+    std::cout.clear();
+    std::wcout.clear();
 }
 } // namespace misc_platform
 } // namespace plugininfra

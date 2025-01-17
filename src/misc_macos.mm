@@ -18,6 +18,8 @@ bool isDarkMode()
         [NSUserDefaults.standardUserDefaults valueForKey:@"AppleInterfaceStyle"];
     return [interfaceStyle isEqualToString:@"Dark"];
 }
+
+void allocateConsole() {} // a mac/lin no-op but on windows it does stuff
 } // namespace misc_platform
 } // namespace plugininfra
 } // namespace sst
