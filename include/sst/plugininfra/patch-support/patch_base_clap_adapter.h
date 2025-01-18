@@ -16,6 +16,7 @@
 #define INCLUDE_SST_PLUGININFRA_PATCH_SUPPORT_PATCH_BASE_CLAP_ADAPTER_H
 
 #include <vector>
+#include <cassert>
 #include <clap/clap.h>
 
 namespace sst::plugininfra::patch_support
@@ -120,11 +121,25 @@ inline bool patchParamsTextToValue(clap_id paramId, const char *display, double 
     auto val = it->second->meta.valueFromString(display, err);
     if (!val.has_value())
     {
-        SXSNLOG("Error converting '" << display << "' : " << err);
         return false;
     }
     *value = *val;
     return true;
+}
+
+template <typename Param, typename ClapEventType, typename Patch>
+inline Param *paramFromClapEvent(const ClapEventType *pevt, const Patch &patch) noexcept
+{
+    auto *par = reinterpret_cast<Param *>(pevt->cookie);
+    if (!par)
+    {
+        auto pid = pevt->param_id;
+        auto pit = patch.paramMap.find(pid);
+        if (pit == patch.paramMap.end())
+            return nullptr;
+        par = pit->second;
+    }
+    return par;
 }
 
 } // namespace sst::plugininfra::patch_support
