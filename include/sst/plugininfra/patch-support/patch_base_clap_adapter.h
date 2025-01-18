@@ -19,6 +19,7 @@
 #include <cassert>
 #include <string>
 #include <cstdint>
+#include <cstring>
 #include <clap/clap.h>
 
 namespace sst::plugininfra::patch_support
