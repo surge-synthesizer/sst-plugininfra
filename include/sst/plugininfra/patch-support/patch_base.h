@@ -19,6 +19,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <functional>
 
 #include "sst/basic-blocks/params/ParamMetadata.h"
 
@@ -78,6 +79,7 @@ template <typename Patch, typename Par> struct PatchBase
     Patch *asPatch() { return static_cast<Patch *>(this); }
     const Patch *asPatch() const { return static_cast<const Patch *>(this); }
 
+    std::function<void(Patch &)> onResetToInit{nullptr};
     void resetToInit(const char *iname = "Init")
     {
         dirty = false;
@@ -87,6 +89,9 @@ template <typename Patch, typename Par> struct PatchBase
             p->value = p->meta.defaultVal;
         }
         strncpy(asPatch()->name, "Init", 255);
+
+        if (onResetToInit)
+            onResetToInit(*asPatch());
     }
 
     std::string toState() const
