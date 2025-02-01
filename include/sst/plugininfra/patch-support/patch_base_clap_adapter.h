@@ -102,7 +102,10 @@ inline bool patchParamsValueToText(clap_id paramId, double value, char *display,
     {
         return false;
     }
-    auto valdisp = it->second->meta.valueToString(value);
+    auto ts = patch.isParamTemposynced(it->second);
+
+    auto valdisp = it->second->meta.valueToString(
+        value, sst::basic_blocks::params::ParamMetaData::FeatureState().withTemposync(ts));
     if (!valdisp.has_value())
         return false;
 
