@@ -35,6 +35,8 @@ struct ParamBase
     const md_t meta{};
 
     operator const float &() const { return value; }
+
+    bool isTemposynced() const { return false; }
 };
 
 template <typename Patch, typename Par> struct PatchBase
@@ -47,12 +49,14 @@ template <typename Patch, typename Par> struct PatchBase
     {
         static_assert(Patch::patchVersion > 0);
         static_assert(Patch::id[0] != 0); // a const char* please
-        static_assert(std::is_same_v<decltype(std::declval<Patch>().name[0]), char &&>);
+        static_assert(
+            std::is_same_v<std::remove_reference_t<decltype(std::declval<Patch>().name[0])>, char>);
         static_assert(
             std::is_same_v<decltype(&Patch::migratePatchFromVersion), void (Patch::*)(uint32_t)>);
         static_assert(std::is_same_v<decltype(&Patch::migrateParamValueFromVersion),
                                      float (Patch::*)(Par *p, float, uint32_t)>);
     }
+
     void pushSingleParam(Par *p)
     {
         params.push_back(p);
@@ -189,6 +193,8 @@ template <typename Patch, typename Par> struct PatchBase
             asPatch()->migratePatchFromVersion(ver);
         return true;
     }
+
+    bool isParamTemposynced(Par *p) const { return p->isTemposynced(); }
 };
 
 } // namespace sst::plugininfra::patch_support
