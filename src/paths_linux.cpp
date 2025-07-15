@@ -196,7 +196,7 @@ fs::path bestDocumentsVendorFolderPathFor(const std::string &vendorName,
     return dotpn;
 }
 
-fs::path bestLibraryVendorSharedFolderPathFor(const std::string &productName, bool userLevel)
+fs::path bestLibrarySharedVendorFolderPathFor(const std::string &productName, bool userLevel)
 {
     if (userLevel)
     {
