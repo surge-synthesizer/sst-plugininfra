@@ -163,7 +163,8 @@ fs::path lookupXdgUserPath(const char *xdgDirId)
  * 2. Does ~/Documents exists? If so use that
  * 3. Else use ~/.productName
  */
-fs::path bestDocumentsFolderPathFor(const std::string &productName)
+fs::path bestDocumentsVendorFolderPathFor(const std::string &vendorName,
+                                          const std::string &productName)
 {
     fs::path xdgdd = lookupXdgUserPath("XDG_DOCUMENTS_DIR");
     if (!xdgdd.empty())
@@ -178,6 +179,12 @@ fs::path bestDocumentsFolderPathFor(const std::string &productName)
     auto documentpn = hp / "Documents" / productName;
     auto dotpn = hp / ("." + productName);
 
+    if (!vendorName.empty())
+    {
+        documentpn = hp / "Documents" / vendorName / productName;
+        dotpn = hp / ("." + vendorName) / productName;
+    }
+
     if (fs::is_directory(dotpn))
         return dotpn;
     if (fs::is_directory(documentpn))
@@ -189,7 +196,7 @@ fs::path bestDocumentsFolderPathFor(const std::string &productName)
     return dotpn;
 }
 
-fs::path bestLibrarySharedFolderPathFor(const std::string &productName, bool userLevel)
+fs::path bestLibraryVendorSharedFolderPathFor(const std::string &productName, bool userLevel)
 {
     if (userLevel)
     {

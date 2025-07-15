@@ -70,20 +70,32 @@ fs::path sharedLibraryBinaryPath()
     }
 }
 
-fs::path bestDocumentsFolderPathFor(const std::string &productName)
+fs::path bestDocumentsVendorFolderPathFor(const std::string &vendorName,
+                                          const std::string &productName)
 {
-    return knownFolderPath(FOLDERID_Documents, "Documents") / productName;
+    if (!vendorName.empty())
+        return knownFolderPath(FOLDERID_Documents, "Documents") / vendorName / productName;
+    else
+        return knownFolderPath(FOLDERID_Documents, "Documents") / productName;
 }
 
-fs::path bestLibrarySharedFolderPathFor(const std::string &productName, bool isUser)
+fs::path bestLibrarySharedVendorFolderPathFor(const std::string &vendorName,
+                                              const std::string &productName, bool isUser)
 {
     if (!isUser)
     {
-        return knownFolderPath(FOLDERID_ProgramData, "ProgramData") / productName;
+        if (!vendorName.empty())
+            return knownFolderPath(FOLDERID_ProgramData, "ProgramData") / vendorName / productName;
+        else
+            return knownFolderPath(FOLDERID_ProgramData, "ProgramData") / productName;
     }
     else
     {
-        return knownFolderPath(FOLDERID_LocalAppData, "LocalAppData") / productName;
+        if (!vendorName.empty())
+            return knownFolderPath(FOLDERID_LocalAppData, "LocalAppData") / vendorName /
+                   productName;
+        else
+            return knownFolderPath(FOLDERID_LocalAppData, "LocalAppData") / productName;
     }
 }
 } // namespace paths
