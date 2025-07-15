@@ -196,7 +196,8 @@ fs::path bestDocumentsVendorFolderPathFor(const std::string &vendorName,
     return dotpn;
 }
 
-fs::path bestLibrarySharedVendorFolderPathFor(const std::string &productName, bool userLevel)
+fs::path bestLibrarySharedVendorFolderPathFor(const std::string &vendorName,
+                                              const std::string &productName, bool userLevel)
 {
     if (userLevel)
     {
@@ -204,21 +205,42 @@ fs::path bestLibrarySharedVendorFolderPathFor(const std::string &productName, bo
 
         if (const char *xdgDataPath = getenv("XDG_DATA_HOME"))
         {
-            return fs::path{xdgDataPath} / productName;
+            if (!vendorName.empty())
+                return fs::path{xdgDataPath} / vendorName / productName;
+            else
+                return fs::path{xdgDataPath} / productName;
         }
         else
         {
-            return home / ".local" / "share" / productName;
+            if (!vendorName.empty())
+                return home / ".local" / "share" / vendorName / productName;
+            else
+                return home / ".local" / "share" / productName;
         }
     }
 
-    if (auto cmi = fs::path{CMAKE_INSTALL_PREFIX} / "share" / productName; fs::is_directory(cmi))
-        return cmi;
+    if (vendorName.empty())
+    {
+        if (auto cmi = fs::path{CMAKE_INSTALL_PREFIX} / "share" / productName;
+            fs::is_directory(cmi))
+            return cmi;
 
-    if (auto cmi = fs::path{"/usr"} / "share" / productName; fs::is_directory(cmi))
-        return cmi;
+        if (auto cmi = fs::path{"/usr"} / "share" / productName; fs::is_directory(cmi))
+            return cmi;
 
-    return fs::path{CMAKE_INSTALL_PREFIX} / "share" / productName;
+        return fs::path{CMAKE_INSTALL_PREFIX} / "share" / productName;
+    }
+    else
+    {
+        if (auto cmi = fs::path{CMAKE_INSTALL_PREFIX} / "share" / vendorName / productName;
+            fs::is_directory(cmi))
+            return cmi;
+
+        if (auto cmi = fs::path{"/usr"} / "share" / vendorName / productName; fs::is_directory(cmi))
+            return cmi;
+
+        return fs::path{CMAKE_INSTALL_PREFIX} / "share" / vendorName / productName;
+    }
 }
 } // namespace paths
 } // namespace plugininfra
