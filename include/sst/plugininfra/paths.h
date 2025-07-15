@@ -47,7 +47,16 @@ fs::path sharedLibraryBinaryPath();
  * Importantly this does *not* return any sort of portable name but only uses the OS-specific
  * documents folder resolution strategy. For portable documents folder use sharedLibraryBinaryPath
  */
-fs::path bestDocumentsFolderPathFor(const std::string &productName);
+fs::path bestDocumentsVendorFolderPathFor(const std::string &vendorName,
+                                          const std::string &productName);
+
+/*
+ * And older version took just a product not a vendor and product. Retain it
+ */
+inline fs::path bestDocumentsFolderPathFor(const std::string &productName)
+{
+    return bestDocumentsVendorFolderPathFor("", productName);
+}
 
 /*
  * bestLibrarySharedFolderPathFor returns the "/Library/Application Support/programName"
@@ -57,7 +66,19 @@ fs::path bestDocumentsFolderPathFor(const std::string &productName);
  * folder (so "~/Library/Application Support" on mac and "~/.local/share or XDG based on
  * linux).
  */
-fs::path bestLibrarySharedFolderPathFor(const std::string &productName, bool userLevel = false);
+fs::path bestLibrarySharedVendorFolderPathFor(const std::string &vendorName,
+                                              const std::string &productName,
+                                              bool userLevel = false);
+
+/*
+ * And older version took just a product not a vendor and product. Retain it but alas we need to
+ * change name to avoid overload resolution on const char* picking the wrong one
+ */
+inline fs::path bestLibrarySharedFolderPathFor(const std::string &productName,
+                                               bool userLevel = false)
+{
+    return bestLibrarySharedVendorFolderPathFor("", productName, userLevel);
+}
 
 } // namespace paths
 } // namespace plugininfra

@@ -14,6 +14,8 @@
 #define CATCH_CONFIG_RUNNER
 #include "catch2/catch2.hpp"
 
+#include <iostream>
+
 #include <sst/plugininfra.h>
 #include <sst/plugininfra/userdefaults.h>
 #include <sst/plugininfra/strnatcmp.h>
@@ -31,13 +33,91 @@ TEST_CASE("FileSystem")
     }
 }
 
-TEST_CASE("Documents Folder")
+TEST_CASE("Paths Tests")
 {
     SECTION("Got a documents folder")
     {
         auto dpath = sst::plugininfra::paths::bestDocumentsFolderPathFor("surge-test");
         std::cout << dpath.u8string() << std::endl;
-        REQUIRE(true);
+
+        INFO("document path is " << dpath.u8string());
+        REQUIRE(!dpath.empty());
+
+        REQUIRE((dpath.filename().u8string() == "surge-test" ||
+                 dpath.filename().u8string() == ".surge-test"));
+        REQUIRE(!dpath.parent_path().empty());
+        REQUIRE(!dpath.parent_path().filename().empty());
+    }
+
+    SECTION("Got a documents with Vendor folder")
+    {
+        auto dpath =
+            sst::plugininfra::paths::bestDocumentsVendorFolderPathFor("my-vendor", "surge-test");
+        std::cout << dpath.u8string() << std::endl;
+
+        INFO("document path is " << dpath.u8string());
+        REQUIRE(!dpath.empty());
+        REQUIRE(dpath.filename().u8string() == "surge-test");
+        dpath = dpath.parent_path();
+        REQUIRE(!dpath.empty());
+        REQUIRE((dpath.filename().u8string() == "my-vendor" ||
+                 dpath.filename().u8string() == ".my-vendor"));
+        REQUIRE(!dpath.parent_path().empty());
+        REQUIRE(!dpath.parent_path().filename().empty());
+    }
+
+    SECTION("Got a library folder")
+    {
+        auto dpath = sst::plugininfra::paths::bestLibrarySharedFolderPathFor("surge-test");
+        std::cout << dpath.u8string() << std::endl;
+
+        INFO("library path is " << dpath.u8string());
+        REQUIRE(!dpath.empty());
+        REQUIRE(dpath.filename().u8string() == "surge-test");
+        REQUIRE(!dpath.parent_path().empty());
+        REQUIRE(!dpath.parent_path().filename().empty());
+    }
+
+    SECTION("Got a library with Vendor folder")
+    {
+        auto dpath = sst::plugininfra::paths::bestLibrarySharedVendorFolderPathFor("my-vendor",
+                                                                                   "surge-test");
+        std::cout << dpath.u8string() << std::endl;
+        INFO("library path is " << dpath.u8string());
+        REQUIRE(!dpath.empty());
+        REQUIRE(dpath.filename().u8string() == "surge-test");
+        dpath = dpath.parent_path();
+        REQUIRE(!dpath.empty());
+        REQUIRE(dpath.filename().u8string() == "my-vendor");
+        REQUIRE(!dpath.parent_path().empty());
+        REQUIRE(!dpath.parent_path().filename().empty());
+    }
+
+    SECTION("Got a user library folder")
+    {
+        auto dpath = sst::plugininfra::paths::bestLibrarySharedFolderPathFor("surge-test", true);
+        std::cout << dpath.u8string() << std::endl;
+
+        INFO("library path is " << dpath.u8string());
+        REQUIRE(!dpath.empty());
+        REQUIRE(dpath.filename().u8string() == "surge-test");
+        REQUIRE(!dpath.parent_path().empty());
+        REQUIRE(!dpath.parent_path().filename().empty());
+    }
+
+    SECTION("Got a user library with Vendor folder")
+    {
+        auto dpath = sst::plugininfra::paths::bestLibrarySharedVendorFolderPathFor(
+            "my-vendor", "surge-test", true);
+        std::cout << dpath.u8string() << std::endl;
+        INFO("library path is " << dpath.u8string());
+        REQUIRE(!dpath.empty());
+        REQUIRE(dpath.filename().u8string() == "surge-test");
+        dpath = dpath.parent_path();
+        REQUIRE(!dpath.empty());
+        REQUIRE(dpath.filename().u8string() == "my-vendor");
+        REQUIRE(!dpath.parent_path().empty());
+        REQUIRE(!dpath.parent_path().filename().empty());
     }
 }
 

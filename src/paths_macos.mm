@@ -35,7 +35,7 @@ fs::path sharedLibraryBinaryPath()
     return fs::path{info.dli_fname};
 }
 
-fs::path bestDocumentsFolderPathFor(const std::string &productName)
+fs::path bestDocumentsVendorFolderPathFor(const std::string &vendorName, const std::string &productName)
 {
     auto *fileManager = [NSFileManager defaultManager];
     auto *resultURLs = [fileManager URLsForDirectory:NSDocumentDirectory
@@ -43,12 +43,15 @@ fs::path bestDocumentsFolderPathFor(const std::string &productName)
     if (resultURLs)
     {
         auto *u = [resultURLs objectAtIndex:0];
-        return fs::path{[u fileSystemRepresentation]} / productName;
+        if (!vendorName.empty())
+            return fs::path{[u fileSystemRepresentation]} / vendorName / productName;
+        else
+            return fs::path{[u fileSystemRepresentation]} / productName;
     }
     return fs::path{};
 }
 
-fs::path bestLibrarySharedFolderPathFor(const std::string &productName, bool userLevel)
+fs::path bestLibrarySharedVendorFolderPathFor(const std::string &vendorName, const std::string &productName, bool userLevel)
 {
     auto *fileManager = [NSFileManager defaultManager];
     auto key = userLevel ? NSUserDomainMask : NSLocalDomainMask;
@@ -56,7 +59,10 @@ fs::path bestLibrarySharedFolderPathFor(const std::string &productName, bool use
     if (resultURLs)
     {
         auto *u = [resultURLs objectAtIndex:0];
-        return fs::path{[u fileSystemRepresentation]} / productName;
+        if (!vendorName.empty())
+            return fs::path{[u fileSystemRepresentation]} / vendorName / productName;
+        else
+            return fs::path{[u fileSystemRepresentation]} / productName;
     }
     return fs::path{};
 }
