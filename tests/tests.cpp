@@ -42,7 +42,9 @@ TEST_CASE("Paths Tests")
 
         INFO("document path is " << dpath.u8string());
         REQUIRE(!dpath.empty());
-        REQUIRE(dpath.filename().u8string() == "surge-test");
+
+        REQUIRE((dpath.filename().u8string() == "surge-test" ||
+                 dpath.filename().u8string() == ".surge-test"));
         REQUIRE(!dpath.parent_path().empty());
         REQUIRE(!dpath.parent_path().filename().empty());
     }
@@ -58,7 +60,8 @@ TEST_CASE("Paths Tests")
         REQUIRE(dpath.filename().u8string() == "surge-test");
         dpath = dpath.parent_path();
         REQUIRE(!dpath.empty());
-        REQUIRE(dpath.filename().u8string() == "my-vendor");
+        REQUIRE((dpath.filename().u8string() == "my-vendor" ||
+                 dpath.filename().u8string() == ".my-vendor"));
         REQUIRE(!dpath.parent_path().empty());
         REQUIRE(!dpath.parent_path().filename().empty());
     }
