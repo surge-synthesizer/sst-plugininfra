@@ -98,6 +98,9 @@ template <typename Patch, typename Par> struct PatchBase
             onResetToInit(*asPatch());
     }
 
+    std::function<void(TiXmlElement &)> additionalToState{nullptr};
+    std::function<void(TiXmlElement *, uint32_t)> additionalFromState{nullptr};
+
     std::string toState() const
     {
         TiXmlDocument doc;
@@ -117,6 +120,10 @@ template <typename Patch, typename Par> struct PatchBase
         }
 
         rootNode.InsertEndChild(paramsNode);
+
+        if (additionalToState)
+            additionalToState(rootNode);
+
         doc.InsertEndChild(rootNode);
 
         std::ostringstream oss;
@@ -188,6 +195,9 @@ template <typename Patch, typename Par> struct PatchBase
             }
             par = par->NextSiblingElement("p");
         }
+
+        if (additionalFromState)
+            additionalFromState(rn, ver);
 
         if (ver != Patch::patchVersion)
             asPatch()->migratePatchFromVersion(ver);
