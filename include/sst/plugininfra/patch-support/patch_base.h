@@ -72,6 +72,16 @@ template <typename Patch, typename Par> struct PatchBase
         paramMap.emplace(p->meta.id, p);
     }
 
+    void pushSingleParam(Par *p, uint32_t id)
+    {
+        params.push_back(p);
+        if (paramMap.find(id) != paramMap.end())
+        {
+            std::cerr << __FILE__ << ":" << __LINE__ << "Duplicate param id " << id << std::endl;
+        }
+        paramMap.emplace(id, p);
+    }
+
     template <typename C> void pushMultipleParams(const C &c)
     {
         for (auto &p : c)
