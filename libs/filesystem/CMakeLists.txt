@@ -68,6 +68,7 @@ endif ()
 
 if(MSVC)
     target_compile_options(${PROJECT_NAME} INTERFACE $<$<COMPILE_LANGUAGE:CXX>:/Zc:__cplusplus>)
+    target_compile_options(${PROJECT_NAME} INTERFACE $<$<COMPILE_LANGUAGE:CXX>:/Zc:char8_t->)
 else()
     target_compile_options(${PROJECT_NAME} INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-fno-char8_t>)
 endif()
