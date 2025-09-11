@@ -12,6 +12,13 @@
  * https://github.com/surge-synthesizer/sst-plugininfra
  */
 
+#ifndef INCLUDE_SST_PLUGININFRA_H
+#define INCLUDE_SST_PLUGININFRA_H
+
+static_assert(__cplusplus >= 202002L, "Surge team libraries have moved to C++ 20");
+
 #include "plugininfra/paths.h"
 #include "plugininfra/cpufeatures.h"
 #include "plugininfra/misc_platform.h"
+
+#endif // INCLUDE_SST_PLUGININFRA_H
