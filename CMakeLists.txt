@@ -17,23 +17,22 @@ if (${SST_PLUGININFRA_BUILD_TESTS})
     version_from_git()
 endif()
 
+# Universally disable char8_t for this directory.
 if(MSVC)
-    set(NO_CHAR8_T /Zc:char8_t-)
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:/Zc:char8_t- /Zc:__cplusplus>)
 else()
-    set(NO_CHAR8_T -fno-char8_t)
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-char8_t>)
 endif()
 
 add_subdirectory(libs/filesystem)
 if (${SST_PLUGININFRA_PROVIDE_TINYXML})
     add_subdirectory(libs/tinyxml)
     add_library(${PROJECT_NAME}::tinyxml ALIAS tinyxml)
-    target_compile_options(tinyxml PUBLIC ${NO_CHAR8_T})
 endif ()
 
 if (${SST_PLUGININFRA_PROVIDE_STRNATCMP})
     add_subdirectory(libs/strnatcmp)
     add_library(${PROJECT_NAME}::strnatcmp ALIAS strnatcmp)
-    target_compile_options(strnatcmp PUBLIC ${NO_CHAR8_T})
 endif ()
 
 if (${SST_PLUGININFRA_PROVIDE_MINIZ})
@@ -60,7 +59,6 @@ if (${SST_PLUGININFRA_PROVIDE_PATCHBASE})
     target_compile_definitions(patchbase INTERFACE SST_PLUGININFRA_PATCHBASE=1)
     target_link_libraries(patchbase INTERFACE tinyxml sst-basic-blocks clap)
     add_library(${PROJECT_NAME}::patchbase ALIAS patchbase)
-    target_compile_options(${PROJECT_NAME}::patchbase PUBLIC ${NO_CHAR8_T})
 endif()
 
 add_library(version_information STATIC)
@@ -73,7 +71,6 @@ configure_file(src/version_information_in.cpp ${CMAKE_BINARY_DIR}/geninclude/ver
 target_sources(version_information PRIVATE  ${CMAKE_BINARY_DIR}/geninclude/version_information.cpp)
 target_include_directories(version_information PUBLIC include)
 target_compile_definitions(version_information PUBLIC SST_PLUGININFRA_HAS_VERSION_INFORMATION=1)
-target_compile_options(version_information PUBLIC ${NO_CHAR8_T})
 add_library(${PROJECT_NAME}::version_information ALIAS version_information)
 
 configure_file(src/paths_subst.cpp.in ${CMAKE_BINARY_DIR}/gen/paths_subst.cpp)
@@ -81,7 +78,6 @@ configure_file(src/paths_subst.cpp.in ${CMAKE_BINARY_DIR}/gen/paths_subst.cpp)
 add_library(${PROJECT_NAME} STATIC EXCLUDE_FROM_ALL ${CMAKE_BINARY_DIR}/gen/paths_subst.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 target_link_libraries(${PROJECT_NAME} PUBLIC ${PROJECT_NAME}::filesystem ${PROJECT_NAME}::strnatcmp)
-target_compile_options(${PROJECT_NAME} PUBLIC ${NO_CHAR8_T})
 
 target_sources(${PROJECT_NAME} PRIVATE src/cpufeatures.cpp)
 
