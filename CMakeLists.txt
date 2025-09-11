@@ -19,7 +19,8 @@ endif()
 
 # Universally disable char8_t for this directory.
 if(MSVC)
-    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:/Zc:char8_t- /Zc:__cplusplus>)
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:/Zc:__cplusplus>)
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:/Zc:char8_t->)
 else()
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-char8_t>)
 endif()
