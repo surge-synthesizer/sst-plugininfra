@@ -268,8 +268,7 @@ template <typename E, int maxE> struct Provider
         if (!dFile.is_open())
         {
             std::ostringstream emsg;
-            emsg << "Unable to open defaults file '" << path_to_string(defaultsFile)
-                 << "' for writing.";
+            emsg << "Unable to open defaults file '" << defaultsFile.u8string() << "' for writing.";
             errorHandler(emsg.str(), "Defaults Not Saved");
             return false;
         }

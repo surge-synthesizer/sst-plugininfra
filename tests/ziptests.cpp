@@ -29,13 +29,12 @@ TEST_CASE("Can Unzip File")
     }
 
     auto zipIn = p / "tests" / "three_cpp_files.zip";
-    std::cout << "Reading rrom " << path_to_string(zipIn) << std::endl;
+    std::cout << "Reading rrom " << zipIn.u8string() << std::endl;
 
     mz_zip_archive zip_archive;
     memset(&zip_archive, 0, sizeof(zip_archive));
 
-    auto str = path_to_string(zipIn);
-    auto status = mz_zip_reader_init_file(&zip_archive, str.c_str(), 0);
+    auto status = mz_zip_reader_init_file(&zip_archive, zipIn.u8string().c_str(), 0);
     REQUIRE(status);
 
     auto entries = (int)mz_zip_reader_get_num_files(&zip_archive);

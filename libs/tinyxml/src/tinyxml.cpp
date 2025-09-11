@@ -1055,7 +1055,7 @@ bool TiXmlDocument::LoadFile(const fs::path &filename, TiXmlEncoding encoding)
     Clear();
     location.Clear();
 
-    value = path_to_string(filename);
+    value = filename.u8string();
 
     std::error_code ec;
     const auto length = fs::file_size(filename, ec);
