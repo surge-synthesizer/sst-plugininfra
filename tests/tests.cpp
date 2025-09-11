@@ -27,7 +27,7 @@ TEST_CASE("FileSystem")
     SECTION("Can make a path")
     {
         auto p = fs::path{"tmp"} / fs::path{"var"};
-        auto s = p.u8string();
+        auto s = path_to_string(p);
         s[3] = ' ';
         REQUIRE(s == "tmp var");
     }
@@ -38,13 +38,13 @@ TEST_CASE("Paths Tests")
     SECTION("Got a documents folder")
     {
         auto dpath = sst::plugininfra::paths::bestDocumentsFolderPathFor("surge-test");
-        std::cout << dpath.u8string() << std::endl;
+        std::cout << path_to_string(dpath) << std::endl;
 
-        INFO("document path is " << dpath.u8string());
+        INFO("document path is " << path_to_string(dpath));
         REQUIRE(!dpath.empty());
 
-        REQUIRE((dpath.filename().u8string() == "surge-test" ||
-                 dpath.filename().u8string() == ".surge-test"));
+        REQUIRE((dpath.filename().u8string() == u8"surge-test" ||
+                 dpath.filename().u8string() == u8".surge-test"));
         REQUIRE(!dpath.parent_path().empty());
         REQUIRE(!dpath.parent_path().filename().empty());
     }
@@ -53,15 +53,15 @@ TEST_CASE("Paths Tests")
     {
         auto dpath =
             sst::plugininfra::paths::bestDocumentsVendorFolderPathFor("my-vendor", "surge-test");
-        std::cout << dpath.u8string() << std::endl;
+        std::cout << path_to_string(dpath) << std::endl;
 
-        INFO("document path is " << dpath.u8string());
+        INFO("document path is " << path_to_string(dpath));
         REQUIRE(!dpath.empty());
-        REQUIRE(dpath.filename().u8string() == "surge-test");
+        REQUIRE(dpath.filename().u8string() == u8"surge-test");
         dpath = dpath.parent_path();
         REQUIRE(!dpath.empty());
-        REQUIRE((dpath.filename().u8string() == "my-vendor" ||
-                 dpath.filename().u8string() == ".my-vendor"));
+        REQUIRE((dpath.filename().u8string() == u8"my-vendor" ||
+                 dpath.filename().u8string() == u8".my-vendor"));
         REQUIRE(!dpath.parent_path().empty());
         REQUIRE(!dpath.parent_path().filename().empty());
     }
@@ -69,11 +69,11 @@ TEST_CASE("Paths Tests")
     SECTION("Got a library folder")
     {
         auto dpath = sst::plugininfra::paths::bestLibrarySharedFolderPathFor("surge-test");
-        std::cout << dpath.u8string() << std::endl;
+        std::cout << path_to_string(dpath) << std::endl;
 
-        INFO("library path is " << dpath.u8string());
+        INFO("library path is " << path_to_string(dpath));
         REQUIRE(!dpath.empty());
-        REQUIRE(dpath.filename().u8string() == "surge-test");
+        REQUIRE(dpath.filename().u8string() == u8"surge-test");
         REQUIRE(!dpath.parent_path().empty());
         REQUIRE(!dpath.parent_path().filename().empty());
     }
@@ -82,13 +82,13 @@ TEST_CASE("Paths Tests")
     {
         auto dpath = sst::plugininfra::paths::bestLibrarySharedVendorFolderPathFor("my-vendor",
                                                                                    "surge-test");
-        std::cout << dpath.u8string() << std::endl;
-        INFO("library path is " << dpath.u8string());
+        std::cout << path_to_string(dpath) << std::endl;
+        INFO("library path is " << path_to_string(dpath));
         REQUIRE(!dpath.empty());
-        REQUIRE(dpath.filename().u8string() == "surge-test");
+        REQUIRE(dpath.filename().u8string() == u8"surge-test");
         dpath = dpath.parent_path();
         REQUIRE(!dpath.empty());
-        REQUIRE(dpath.filename().u8string() == "my-vendor");
+        REQUIRE(dpath.filename().u8string() == u8"my-vendor");
         REQUIRE(!dpath.parent_path().empty());
         REQUIRE(!dpath.parent_path().filename().empty());
     }
@@ -96,11 +96,11 @@ TEST_CASE("Paths Tests")
     SECTION("Got a user library folder")
     {
         auto dpath = sst::plugininfra::paths::bestLibrarySharedFolderPathFor("surge-test", true);
-        std::cout << dpath.u8string() << std::endl;
+        std::cout << path_to_string(dpath) << std::endl;
 
-        INFO("library path is " << dpath.u8string());
+        INFO("library path is " << path_to_string(dpath));
         REQUIRE(!dpath.empty());
-        REQUIRE(dpath.filename().u8string() == "surge-test");
+        REQUIRE(dpath.filename().u8string() == u8"surge-test");
         REQUIRE(!dpath.parent_path().empty());
         REQUIRE(!dpath.parent_path().filename().empty());
     }
@@ -109,13 +109,13 @@ TEST_CASE("Paths Tests")
     {
         auto dpath = sst::plugininfra::paths::bestLibrarySharedVendorFolderPathFor(
             "my-vendor", "surge-test", true);
-        std::cout << dpath.u8string() << std::endl;
-        INFO("library path is " << dpath.u8string());
+        std::cout << path_to_string(dpath) << std::endl;
+        INFO("library path is " << path_to_string(dpath));
         REQUIRE(!dpath.empty());
-        REQUIRE(dpath.filename().u8string() == "surge-test");
+        REQUIRE(dpath.filename().u8string() == u8"surge-test");
         dpath = dpath.parent_path();
         REQUIRE(!dpath.empty());
-        REQUIRE(dpath.filename().u8string() == "my-vendor");
+        REQUIRE(dpath.filename().u8string() == u8"my-vendor");
         REQUIRE(!dpath.parent_path().empty());
         REQUIRE(!dpath.parent_path().filename().empty());
     }
@@ -179,7 +179,7 @@ TEST_CASE("Defaults")
         }
         REQUIRE(di < 1000);
         fs::create_directories(td);
-        INFO("Making test in " << td.u8string());
+        INFO("Making test in " << path_to_string(td));
         auto p1 = P(td, "TestCase", k2s, [](auto a, auto b) {});
         REQUIRE(p1.getUserDefaultValue(Foo, 1) == 1);
         REQUIRE(p1.getUserDefaultValue(Bar, "bb") == "bb");
@@ -211,7 +211,7 @@ TEST_CASE("Defaults")
 
         REQUIRE(di < 1000);
         fs::create_directories(td);
-        INFO("Making test in " << td.u8string());
+        INFO("Making test in " << path_to_string(td));
         {
             auto p1 = P(td, "TestCase", k2s, [](auto a, auto b) {});
             REQUIRE(p1.getUserDefaultValue(Foo, 1) == 1);

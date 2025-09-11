@@ -18,12 +18,13 @@ int main(int argc, char **argv)
 {
     using namespace sst::plugininfra::paths;
     std::cout << "Path Display for Platform\n";
-    std::cout << "home    : " << homePath().u8string() << "\n";
-    std::cout << "bin     : " << sharedLibraryBinaryPath().u8string() << "\n";
-    std::cout << "docs    : " << bestDocumentsFolderPathFor("test-sst-plugininfra").u8string()
+    std::cout << "home    : " << path_to_string(homePath()) << "\n";
+    std::cout << "bin     : " << path_to_string(sharedLibraryBinaryPath()) << "\n";
+    std::cout << "docs    : " << path_to_string(bestDocumentsFolderPathFor("test-sst-plugininfra"))
               << "\n";
-    std::cout << "lib     : " << bestLibrarySharedFolderPathFor("test-sst-plugininfra").u8string()
-              << "\n";
+    std::cout << "lib     : "
+              << path_to_string(bestLibrarySharedFolderPathFor("test-sst-plugininfra")) << "\n";
     std::cout << "lib usr : "
-              << bestLibrarySharedFolderPathFor("test-sst-plugininfra", true).u8string() << "\n";
+              << path_to_string(bestLibrarySharedFolderPathFor("test-sst-plugininfra", true))
+              << "\n";
 }
