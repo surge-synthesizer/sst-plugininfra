@@ -66,4 +66,10 @@ else ()
     endif ()
 endif ()
 
+if(MSVC)
+    target_compile_options(${PROJECT_NAME} INTERFACE $<$<COMPILE_LANGUAGE:CXX>:/Zc:__cplusplus>)
+else()
+    target_compile_options(${PROJECT_NAME} INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-fno-char8_t>)
+endif()
+
 add_library(sst-plugininfra::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
