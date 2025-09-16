@@ -8,11 +8,17 @@ INDIR=$2
 RESOURCESDIR=$3
 TARGET_DIR=$4
 VERSION=$5
+APPSUPPORT_CONTENTS=$6
 
 TMPDIR="./installer-tmp"
 mkdir -p $TMPDIR
 
-echo "MAKE from $INDIR $RESOURCESDIR into $TARGET_DIR with $VERSION"
+echo "Installer Assembly"
+echo "  indir=$INDIR"
+echo "  resources=$RESOURCESDIR"
+echo "  target=$TARGET_DIR"
+echo "  version=$VERSION"
+echo "  appsupp=$APPSUPPORT_CONTENTS"
 
 VST3="${PRODUCT}.vst3"
 AU="${PRODUCT}.component"
@@ -109,7 +115,19 @@ if [[ -d $INDIR/$CLAP ]]; then
     build_flavor "CLAP" "$CLAP" "org.surge-synth-team.${PRODUCTFILE}.clap.pkg" "/Library/Audio/Plug-Ins/CLAP"
 fi
 
-echo --- Sub Packages Created ---
+
+if [[ -n "$APPSUPPORT_CONTENTS" ]];
+then
+  echo "--- BUILDING ${PRODUCTFILE}_AppSupport pkg ---"
+  if [[ ! -z $MAC_INSTALLING_CERT ]]; then
+    pkgbuild --sign "$MAC_INSTALLING_CERT" --root "$APPSUPPORT_CONTENTS" --identifier "org.surge-synth-team.${PRODUCTFILE}.resources.pkg" --version $VERSION ---install-location "/Library/Application Support" ${TMPDIR}/${PRODUCTFILE}_AppSupport.pkg
+  else
+    pkgbuild --root "$APPSUPPORT_CONTENTS" --identifier "org.surge-synth-team.${PRODUCTFILE}.resources.pkg" --version $VERSION --install-location "/Library/Application Support" ${TMPDIR}/${PRODUCTFILE}_AppSupport.pkg
+  fi
+fi
+
+echo ""
+echo "--- Sub Packages Created ---"
 ls -l "${TMPDIR}"
 
 # create distribution.xml
@@ -135,6 +153,12 @@ if [[ -d $INDIR/$APP ]]; then
 	APP_CHOICE_DEF="<choice id=\"org.surge-synth-team.${PRODUCTFILE}.app.pkg\" visible=\"true\" start_selected=\"true\" title=\"${PRODUCT} App\"><pkg-ref id=\"org.surge-synth-team.${PRODUCTFILE}.app.pkg\"/></choice><pkg-ref id=\"org.surge-synth-team.${PRODUCTFILE}.app.pkg\" version=\"${VERSION}\" onConclusion=\"none\">${PRODUCTFILE}_APP.pkg</pkg-ref>"
 fi
 
+if [[ -n "$APPSUPPORT_CONTENTS" ]];
+then
+	APPSUP_PKG_REF="<pkg-ref id=\"org.surge-synth-team.${PRODUCTFILE}.resources.pkg\"/>"
+	APPSUP_CHOICE="<line choice=\"org.surge-synth-team.${PRODUCTFILE}.resources.pkg\"/>"
+	APPSUP_CHOICE_DEF="<choice id=\"org.surge-synth-team.${PRODUCTFILE}.resources.pkg\" visible=\"true\" enabled=\"false\" start_selected=\"true\" title=\"${PRODUCT} Resources\"><pkg-ref id=\"org.surge-synth-team.${PRODUCTFILE}.resources.pkg\"/></choice><pkg-ref id=\"org.surge-synth-team.${PRODUCTFILE}.resources.pkg\" version=\"${VERSION}\" onConclusion=\"none\">${PRODUCTFILE}_AppSupport.pkg</pkg-ref>"
+fi
 
 cat > $TMPDIR/distribution.xml << XMLEND
 <?xml version="1.0" encoding="utf-8"?>
@@ -146,17 +170,20 @@ cat > $TMPDIR/distribution.xml << XMLEND
     ${AU_PKG_REF}
     ${CLAP_PKG_REF}
     ${APP_PKG_REF}
+    ${APPSUP_PKG_REF}
     <options require-scripts="false" customize="always" hostArchitectures="x86_64,arm64" />
     <choices-outline>
         ${VST3_CHOICE}
         ${AU_CHOICE}
         ${CLAP_CHOICE}
         ${APP_CHOICE}
+        ${APPSUP_CHOICE}
     </choices-outline>
     ${VST3_CHOICE_DEF}
     ${AU_CHOICE_DEF}
     ${CLAP_CHOICE_DEF}
     ${APP_CHOICE_DEF}
+    ${APPSUP_CHOICE_DEF}
 </installer-gui-script>
 XMLEND
 
