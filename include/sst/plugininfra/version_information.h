@@ -45,6 +45,7 @@ struct VersionInformation
     static const char *build_date;
     static const char *build_year;
     static const char *build_time;
+    static const char *build_host;
 };
 } // namespace sst::plugininfra
 #endif

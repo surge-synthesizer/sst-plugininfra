@@ -49,5 +49,6 @@ const char *VersionInformation::cmake_system_name{"@CMAKE_SYSTEM_NAME@"};
 const char *VersionInformation::build_date{"@SSTPI_VERS_BUILD_DATE@"};
 const char *VersionInformation::build_year{"@SSTPI_VERS_BUILD_YEAR@"};
 const char *VersionInformation::build_time{"@SSTPI_VERS_BUILD_TIME@"};
+const char *VersionInformation::build_host{"@SSTPI_FQDN@"};
 // clang-format on
 } // namespace sst::plugininfra
