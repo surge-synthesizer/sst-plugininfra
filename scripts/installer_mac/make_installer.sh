@@ -120,7 +120,7 @@ if [[ -n "$APPSUPPORT_CONTENTS" ]];
 then
   echo "--- BUILDING ${PRODUCTFILE}_AppSupport pkg ---"
   if [[ ! -z $MAC_INSTALLING_CERT ]]; then
-    pkgbuild --sign "$MAC_INSTALLING_CERT" --root "$APPSUPPORT_CONTENTS" --identifier "org.surge-synth-team.${PRODUCTFILE}.resources.pkg" --version $VERSION ---install-location "/Library/Application Support" ${TMPDIR}/${PRODUCTFILE}_AppSupport.pkg
+    pkgbuild --sign "$MAC_INSTALLING_CERT" --root "$APPSUPPORT_CONTENTS" --identifier "org.surge-synth-team.${PRODUCTFILE}.resources.pkg" --version $VERSION --install-location "/Library/Application Support" ${TMPDIR}/${PRODUCTFILE}_AppSupport.pkg
   else
     pkgbuild --root "$APPSUPPORT_CONTENTS" --identifier "org.surge-synth-team.${PRODUCTFILE}.resources.pkg" --version $VERSION --install-location "/Library/Application Support" ${TMPDIR}/${PRODUCTFILE}_AppSupport.pkg
   fi
