@@ -50,6 +50,21 @@ void allocateConsole()
     std::cout.clear();
     std::wcout.clear();
 }
+
+std::string toOSCase(const std::string &text)
+{
+    auto s = text;
+
+    for (auto i = 1; i < s.length() - 1; ++i)
+    {
+        if (!(std::isupper(s[i]) && (std::isupper(s[i + 1]) || !std::isalpha(s[i + 1]))))
+        {
+            s[i] = std::tolower(s[i]);
+        }
+    }
+
+    return s;
+}
 } // namespace misc_platform
 } // namespace plugininfra
 } // namespace sst
