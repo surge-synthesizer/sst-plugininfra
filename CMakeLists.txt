@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.10)
 project(sst-plugininfra VERSION 0.5 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
-set(SST_PLUGININFRA_BUILD_TESTS true)
 
 option(SST_PLUGININFRA_FILESYSTEM_FORCE_PLATFORM "Use std::filesystem from the platform headers no matter what" OFF)
 option(SST_PLUGININFRA_PROVIDE_TINYXML "Provide tinyxml as a target" ON)
