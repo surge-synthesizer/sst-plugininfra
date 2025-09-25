@@ -34,6 +34,13 @@ void allocateConsole();
  * Output is string in Windows style (Menu entry is like this), or unmodified if we're on macOS
  */
 std::string toOSCase(const std::string &text);
+
+/*
+ * Some platforms can generate a stack trace as a string. Super useful
+ * to debug. Of course if you use this in production code or tight loops
+ * you have made a grave error. Beware.
+ */
+std::string stackTraceToString(int depth = -1);
 } // namespace misc_platform
 } // namespace plugininfra
 } // namespace sst

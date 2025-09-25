@@ -303,6 +303,15 @@ TEST_CASE("macOS/Windows Context Menu Case Difference")
     REQUIRE(r.compare(t) == 0);
 #endif
 }
+
+TEST_CASE("Generates a backtrace")
+{
+    // There's really no test for this other than it links
+    auto r = sst::plugininfra::misc_platform::stackTraceToString();
+    std::cout << r << std::endl;
+    REQUIRE(!r.empty());
+}
+
 TEST_CASE("Dark Mode Returns Something")
 {
     bool dm = sst::plugininfra::misc_platform::isDarkMode();
