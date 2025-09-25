@@ -14,6 +14,13 @@
 
 #include <sst/plugininfra/misc_platform.h>
 
+#include <stdio.h>
+#include <cstdlib>
+#include <execinfo.h>
+#include <string>
+#include <sstream>
+#include <iomanip>
+
 namespace sst
 {
 namespace plugininfra
@@ -26,6 +33,23 @@ bool isDarkMode() { return true; }
 void allocateConsole() {}
 
 std::string toOSCase(const std::string &text) { return text; }
+
+std::string stackTraceToString(int depth)
+{
+    void *callstack[128];
+    int i, frames = backtrace(callstack, 128);
+    char **strs = backtrace_symbols(callstack, frames);
+    if (depth < 0)
+        depth = frames;
+    std::ostringstream oss;
+    oss << "-------- Stack Trace (" << depth << " frames of " << frames << " showing) --------\n";
+    for (i = 1; i < frames && i < depth; ++i)
+    {
+        oss << "   [" << std::setw(3) << i << "]: " << strs[i] << "\n";
+    }
+    free(strs);
+    return oss.str();
+}
 } // namespace misc_platform
 } // namespace plugininfra
 } // namespace sst

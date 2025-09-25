@@ -65,6 +65,8 @@ std::string toOSCase(const std::string &text)
 
     return s;
 }
+
+std::string stackTraceToString(int depth) { return "Stack Trace not available on Windows"; }
 } // namespace misc_platform
 } // namespace plugininfra
 } // namespace sst
