@@ -1,3 +1,11 @@
+if(WIN32)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC WINDOWS=1)
+elseif(APPLE)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC MAC=1)
+else()
+    target_compile_definitions(${PROJECT_NAME} PUBLIC LINUX=1)
+endif()
+
 message(STATUS "Building plugininfra tests")
 add_executable(sst-plugininfra-tests)
 target_include_directories(sst-plugininfra-tests PRIVATE tests ../libs)

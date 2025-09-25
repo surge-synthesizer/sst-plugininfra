@@ -15,6 +15,8 @@
 #ifndef INCLUDE_SST_PLUGININFRA_MISC_PLATFORM_H
 #define INCLUDE_SST_PLUGININFRA_MISC_PLATFORM_H
 
+#include <string>
+
 namespace sst
 {
 namespace plugininfra
@@ -22,7 +24,16 @@ namespace plugininfra
 namespace misc_platform
 {
 bool isDarkMode();
-void allocateConsole(); // a mac/lin no-op but on windows it does stuff
+
+// a macOS/LInux no-op, but on Windows it does stuff
+void allocateConsole();
+
+/*
+ * Used to convert letter case for menu entries
+ * Input string should be macOS style (Menu Entry is Like This)
+ * Output is string in Windows style (Menu entry is like this), or unmodified if we're on macOS
+ */
+std::string toOSCase(const std::string &text);
 } // namespace misc_platform
 } // namespace plugininfra
 } // namespace sst

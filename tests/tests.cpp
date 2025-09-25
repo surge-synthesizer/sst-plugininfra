@@ -15,6 +15,7 @@
 #include "catch2/catch2.hpp"
 
 #include <iostream>
+#include <string>
 
 #include <sst/plugininfra.h>
 #include <sst/plugininfra/userdefaults.h>
@@ -290,6 +291,18 @@ TEST_CASE("strnatcmp with spaces", "[infra]")
     SECTION("Doubled Spaces") { REQUIRE(strnatcmp("Spa  Day", "Spa Day") == 0); }
 }
 
+TEST_CASE("macOS/Windows Context Menu Case Difference")
+{
+    std::string t = "Mac is Doing Context Menus Like This";
+
+    auto r = sst::plugininfra::misc_platform::toOSCase(t);
+
+#if WINDOWS
+    REQUIRE(r.compare(std::string{"Mac is doing context menus like this"}) == 0);
+#else
+    REQUIRE(r.compare(t) == 0);
+#endif
+}
 TEST_CASE("Dark Mode Returns Something")
 {
     bool dm = sst::plugininfra::misc_platform::isDarkMode();
@@ -297,7 +310,7 @@ TEST_CASE("Dark Mode Returns Something")
     REQUIRE(true);
 }
 
-TEST_CASE("KeyBindings Compile Absent JUCE")
+TEST_CASE("Keybindings Compile Absent JUCE")
 {
     enum Foo
     {

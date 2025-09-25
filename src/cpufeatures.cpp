@@ -183,7 +183,6 @@ bool hasAVX()
     unsigned int nIds = info[0];
 
     cpuid(info, 0x80000000);
-    unsigned nExIds = info[0];
 
     bool avxSup = false;
     if (nIds >= 0x00000001)

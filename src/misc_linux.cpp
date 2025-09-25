@@ -22,7 +22,10 @@ namespace misc_platform
 {
 bool isDarkMode() { return true; }
 
-void allocateConsole() {} // a mac/lin no-op but on windows it does stuff
+// a macOS/LInux no-op, but on Windows it does stuff
+void allocateConsole() {}
+
+std::string toOSCase(const std::string &text) { return text; }
 } // namespace misc_platform
 } // namespace plugininfra
 } // namespace sst
