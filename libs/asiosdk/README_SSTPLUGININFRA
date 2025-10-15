@@ -1,0 +1,5 @@
+This is an exact copy of the ASIO SDK 2.3.4 2025_10_15, which was the
+first version of the ASIO SDK to be released under both the ASIO Proprietary
+and GPL3 license.
+
+The only change to the steinberg distribution is the addition of this file.
