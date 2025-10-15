@@ -67,6 +67,19 @@ std::string toOSCase(const std::string &text)
 }
 
 std::string stackTraceToString(int depth) { return "Stack Trace not available on Windows"; }
+
+std::string getLastSystemError()
+{
+    DWORD error_code = GetLastError();
+    LPSTR message_buffer = nullptr;
+    FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+                       FORMAT_MESSAGE_IGNORE_INSERTS,
+                   NULL, error_code, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                   (LPSTR)&message_buffer, 0, NULL);
+    auto res = std::string(message_buffer);
+    LocalFree(message_buffer);
+    return res;
+}
 } // namespace misc_platform
 } // namespace plugininfra
 } // namespace sst
