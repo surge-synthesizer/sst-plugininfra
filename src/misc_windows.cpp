@@ -80,7 +80,6 @@ std::string getLastSystemError()
     LocalFree(message_buffer);
     return res;
 }
-}
 } // namespace misc_platform
 } // namespace plugininfra
 } // namespace sst
