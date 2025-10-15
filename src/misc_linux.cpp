@@ -21,7 +21,7 @@
 #include <sstream>
 #include <iomanip>
 #include <cstring>
-#include <errno>
+#include <errno.h>
 
 namespace sst
 {
