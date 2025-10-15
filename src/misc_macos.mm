@@ -22,6 +22,7 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <cstring>
 
 namespace sst
 {
@@ -57,6 +58,8 @@ std::string stackTraceToString(int depth)
     free(strs);
     return oss.str();
 }
+
+std::string getLastSystemError() { return std::string(strerror(errno)); }
 } // namespace misc_platform
 } // namespace plugininfra
 } // namespace sst

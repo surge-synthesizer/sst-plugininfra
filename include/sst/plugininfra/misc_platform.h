@@ -41,6 +41,12 @@ std::string toOSCase(const std::string &text);
  * you have made a grave error. Beware.
  */
 std::string stackTraceToString(int depth = -1);
+
+/*
+ * Platforms getting system error messages is non-uniform
+ * This is an alias to strerror(errno) and GetLastError
+ */
+std::string getLastSystemError();
 } // namespace misc_platform
 } // namespace plugininfra
 } // namespace sst

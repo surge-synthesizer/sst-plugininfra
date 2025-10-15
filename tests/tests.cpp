@@ -349,6 +349,17 @@ TEST_CASE("Keybindings Compile Absent JUCE")
     km->matches(TestKeyPress());
 }
 
+TEST_CASE("Error when opening a non-existent file")
+{
+    auto p = fs::path{"non-existent-file/really/not-there.zipzip"};
+    std::ofstream f(p);
+    auto res = sst::plugininfra::misc_platform::getLastSystemError();
+    REQUIRE(!f);
+    INFO(res);
+    REQUIRE(!res.empty());
+    std::cout << "Forced ErrorMessage is [" << res << "]" << std::endl;
+}
+
 int main(int argc, char **argv)
 {
     int result = Catch::Session().run(argc, argv);
