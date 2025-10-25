@@ -274,7 +274,6 @@ template <typename E, int maxE> struct Provider
         }
 
         dFile << "<?xml version = \"1.0\" encoding = \"UTF-8\" ?>\n"
-              << "<!-- User Defaults for Surge XT Synthesizer -->\n"
               << "<defaults version=\"1\">" << std::endl;
 
         for (auto &el : defaultsFileContents)
