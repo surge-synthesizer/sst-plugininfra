@@ -231,7 +231,7 @@ template <typename E, int maxE> struct Provider
                     UserDefaultValue v;
                     int vt;
                     def->Attribute("type", &vt);
-                    v.type = (enum UserDefaultValue::ValueType)vt;
+                    v.type = static_cast<UserDefaultValue::ValueType>(vt);
                     v.keystring = def->Attribute("key");
 
                     if (v.type == UserDefaultValue::ud_pair)
