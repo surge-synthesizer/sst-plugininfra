@@ -50,14 +50,14 @@ if(${SST_PLUGININFRA_PROVIDE_PATCHBASE})
         message(FATAL_ERROR "To provide PatchBase, PLUGININFRA needs clap")
     endif()
 
-    add_library(patchbase INTERFACE)
+    add_library(patchbase INTERFACE EXCLUDE_FROM_ALL)
     target_include_directories(patchbase INTERFACE include)
     target_compile_definitions(patchbase INTERFACE SST_PLUGININFRA_PATCHBASE=1)
     target_link_libraries(patchbase INTERFACE tinyxml sst-basic-blocks clap)
     add_library(${PROJECT_NAME}::patchbase ALIAS patchbase)
 endif()
 
-add_library(version_information STATIC)
+add_library(version_information STATIC EXCLUDE_FROM_ALL)
 
 string(TIMESTAMP SSTPI_VERS_BUILD_DATE "%Y-%m-%d" UTC)
 string(TIMESTAMP SSTPI_VERS_BUILD_YEAR "%Y" UTC)
