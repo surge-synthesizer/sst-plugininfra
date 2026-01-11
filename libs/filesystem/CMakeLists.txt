@@ -12,6 +12,7 @@ function(generate_header FS_HEADER FS_NAMESPACE FS_DEFINE)
 endfunction()
 
 function(use_ghc_fs)
+    message(STATUS "Using ghc:filesystem as filesystem")
     # Don't export GHC symbols from ELF shared objects
     set(HEADER_FILE "${HEADER_DIR}/ghc-filesystem.h")
     file(STRINGS ghc-filesystem/include/ghc/filesystem.hpp HEADER_DATA NEWLINE_CONSUME NO_HEX_CONVERSION)
@@ -31,18 +32,22 @@ function(use_ghc_fs)
 endfunction()
 
 function(use_platform_fs)
+    message(STATUS "Using platform std::filesystem as filesystem")
     add_library(${PROJECT_NAME} INTERFACE)
     generate_header("<filesystem>" "std::filesystem" "SST_PLUGINFRA_PLATFORM_FS")
     target_include_directories(${PROJECT_NAME} INTERFACE "${INC_DIR}")
 endfunction()
 
+set(DEF_FORCE_GHC FALSE)
 if (UNIX AND NOT APPLE)
-    # with gcc11 on arch and latest ardour we get a crash in std::fs if we use the
-    # os provided one so keep this as an option but default to off
-    set(SST_PLUGININFRA_FILESYSTEM_FORCE_GHC ON CACHE BOOL "Force GHC filesystem implementation")
-else ()
-    set(SST_PLUGININFRA_FILESYSTEM_FORCE_GHC OFF CACHE BOOL "Force GHC filesystem implementation")
+    if (${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS_EQUAL 11.0)
+        # with gcc11 on arch and latest ardour we get a crash in std::fs if we use the
+        # os provided one so keep this as an option but default to off
+        set(DEF_FORCE_GHC TRUE)
+    endif()
 endif ()
+
+set(SST_PLUGININFRA_FILESYSTEM_FORCE_GHC ${DEF_FORCE_GHC} CACHE BOOL "Force GHC filesystem implementation")
 
 if (${SST_PLUGININFRA_FILESYSTEM_FORCE_PLATFORM})
     message(STATUS "Forcing filesystem to platform")
