@@ -111,7 +111,10 @@ template <typename Patch, typename Par> struct PatchBase
     std::function<void(TiXmlElement &)> additionalToState{nullptr};
     std::function<void(TiXmlElement *, uint32_t)> additionalFromState{nullptr};
 
-    std::string toState() const
+    std::function<void(TiXmlElement &)> dawExtraStateTo{nullptr};
+    std::function<void(TiXmlElement &)> dawExtraStateFrom{nullptr};
+
+    std::string toState(bool withDawExtraState = false) const
     {
         TiXmlDocument doc;
         TiXmlElement rootNode("patch");
@@ -133,6 +136,13 @@ template <typename Patch, typename Par> struct PatchBase
 
         if (additionalToState)
             additionalToState(rootNode);
+
+        if (withDawExtraState && dawExtraStateTo)
+        {
+            TiXmlElement dawExtraState("dawExtraState");
+            dawExtraStateTo(dawExtraState);
+            rootNode.InsertEndChild(dawExtraState);
+        }
 
         doc.InsertEndChild(rootNode);
 
@@ -208,6 +218,13 @@ template <typename Patch, typename Par> struct PatchBase
 
         if (additionalFromState)
             additionalFromState(rn, ver);
+
+        if (dawExtraStateFrom)
+        {
+            auto des = rn->FirstChildElement("dawExtraState");
+            if (des)
+                dawExtraStateFrom(*des);
+        }
 
         if (ver != Patch::patchVersion)
             asPatch()->migratePatchFromVersion(ver);

@@ -25,9 +25,10 @@
 namespace sst::plugininfra::patch_support
 {
 template <typename Patch>
-inline bool patchToOutStream(Patch &patch, const clap_ostream *ostream) noexcept
+inline bool patchToOutStream(Patch &patch, const clap_ostream *ostream,
+                             bool includeDawExtraState = false) noexcept
 {
-    auto ss = patch.toState();
+    auto ss = patch.toState(includeDawExtraState);
     auto c = ss.c_str();
     auto s = ss.length() + 1; // write the null terminator
     while (s > 0)
