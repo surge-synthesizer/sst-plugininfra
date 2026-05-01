@@ -35,7 +35,8 @@ fs::path sharedLibraryBinaryPath()
     return fs::path{info.dli_fname};
 }
 
-fs::path bestDocumentsVendorFolderPathFor(const std::string &vendorName, const std::string &productName)
+fs::path bestDocumentsVendorFolderPathFor(const std::string &vendorName,
+                                          const std::string &productName)
 {
     auto *fileManager = [NSFileManager defaultManager];
     auto *resultURLs = [fileManager URLsForDirectory:NSDocumentDirectory
@@ -51,7 +52,8 @@ fs::path bestDocumentsVendorFolderPathFor(const std::string &vendorName, const s
     return fs::path{};
 }
 
-fs::path bestLibrarySharedVendorFolderPathFor(const std::string &vendorName, const std::string &productName, bool userLevel)
+fs::path bestLibrarySharedVendorFolderPathFor(const std::string &vendorName,
+                                              const std::string &productName, bool userLevel)
 {
     auto *fileManager = [NSFileManager defaultManager];
     auto key = userLevel ? NSUserDomainMask : NSLocalDomainMask;
