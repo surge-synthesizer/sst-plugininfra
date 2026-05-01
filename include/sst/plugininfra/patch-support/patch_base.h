@@ -20,6 +20,9 @@
 #include <iostream>
 #include <sstream>
 #include <functional>
+#include <type_traits>
+#include <string>
+#include <concepts>
 
 #include "sst/basic-blocks/params/ParamMetadata.h"
 
@@ -27,6 +30,27 @@
 
 namespace sst::plugininfra::patch_support
 {
+
+template <typename T>
+concept ValidPar = requires(T p, float v) {
+    { p.meta.id } -> std::convertible_to<uint32_t>;
+    { p.meta.defaultVal } -> std::convertible_to<float>;
+    p.value = v;
+    { p.isTemposynced() } -> std::convertible_to<bool>;
+};
+
+template <typename Patch, typename Par>
+concept ValidPatch = ValidPar<Par> && requires(Patch p, Par *par) {
+    requires Patch::patchVersion > 0;
+    requires Patch::id[0] != 0;
+    { p.name[0] } -> std::same_as<char &>;
+    { p.migratePatchFromVersion(uint32_t{}) } -> std::same_as<void>;
+    { p.migrateParamValueFromVersion(par, float{}, uint32_t{}) } -> std::same_as<float>;
+};
+
+template <typename T>
+concept PatchHasAuthor = requires(T &t) { t.author; };
+
 using md_t = sst::basic_blocks::params::ParamMetaData;
 struct ParamBase
 {
@@ -39,23 +63,16 @@ struct ParamBase
     bool isTemposynced() const { return false; }
 };
 
+// Since this is used with a CRTP pattern, assert the validity concept
+// inside the constructor not at declaration, since at declaration Patch and
+// Par will be incomplete
 template <typename Patch, typename Par> struct PatchBase
 {
     bool dirty{false};
     std::vector<const Par *> params;
     std::unordered_map<uint32_t, Par *> paramMap;
 
-    PatchBase()
-    {
-        static_assert(Patch::patchVersion > 0);
-        static_assert(Patch::id[0] != 0); // a const char* please
-        static_assert(
-            std::is_same_v<std::remove_reference_t<decltype(std::declval<Patch>().name[0])>, char>);
-        static_assert(
-            std::is_same_v<decltype(&Patch::migratePatchFromVersion), void (Patch::*)(uint32_t)>);
-        static_assert(std::is_same_v<decltype(&Patch::migrateParamValueFromVersion),
-                                     float (Patch::*)(Par *p, float, uint32_t)>);
-    }
+    PatchBase() { static_assert(ValidPatch<Patch, Par>); }
 
     void pushSingleParam(Par *p)
     {
@@ -93,6 +110,32 @@ template <typename Patch, typename Par> struct PatchBase
     Patch *asPatch() { return static_cast<Patch *>(this); }
     const Patch *asPatch() const { return static_cast<const Patch *>(this); }
 
+    std::string getAuthor() const
+    {
+        if constexpr (PatchHasAuthor<Patch>)
+        {
+            return std::string(asPatch()->author);
+        }
+        return {};
+    }
+
+    void setAuthor(const std::string &a)
+    {
+        if constexpr (PatchHasAuthor<Patch>)
+        {
+            using AuthorT = std::remove_reference_t<decltype(asPatch()->author)>;
+            if constexpr (std::is_array_v<AuthorT>)
+            {
+                memset(asPatch()->author, 0, sizeof(asPatch()->author));
+                strncpy(asPatch()->author, a.c_str(), sizeof(asPatch()->author) - 1);
+            }
+            else
+            {
+                asPatch()->author = a;
+            }
+        }
+    }
+
     std::function<void(Patch &)> onResetToInit{nullptr};
     void resetToInit(const char *iname = "Init")
     {
@@ -121,6 +164,10 @@ template <typename Patch, typename Par> struct PatchBase
         rootNode.SetAttribute("id", Patch::id);
         rootNode.SetAttribute("version", Patch::patchVersion);
         rootNode.SetAttribute("name", asPatch()->name);
+        if constexpr (PatchHasAuthor<Patch>)
+        {
+            rootNode.SetAttribute("author", getAuthor().c_str());
+        }
 
         TiXmlElement paramsNode("params");
 
@@ -180,6 +227,18 @@ template <typename Patch, typename Par> struct PatchBase
         {
             memset(asPatch()->name, 0, sizeof(asPatch()->name));
             strncpy(asPatch()->name, rn->Attribute("name"), sizeof(asPatch()->name) - 1);
+        }
+
+        if constexpr (PatchHasAuthor<Patch>)
+        {
+            if (rn->Attribute("author"))
+            {
+                setAuthor(rn->Attribute("author"));
+            }
+            else
+            {
+                setAuthor("");
+            }
         }
 
         auto pars = rn->FirstChildElement("params");
