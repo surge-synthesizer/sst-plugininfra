@@ -1180,7 +1180,7 @@ class TiXmlElement : public TiXmlNode
     /** Sets an attribute of name to a given value. The attribute
             will be created if it does not exist, or changed if it does.
     */
-    void SetDoubleAttribute(const char *name, double value);
+    void SetDoubleAttribute(const char *name, double value, int precision = 12);
 
     /** Deletes an attribute with the given name.
      */
