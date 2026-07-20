@@ -714,14 +714,14 @@ void TiXmlElement::SetAttribute(const std::string &name, int val)
 }
 #endif
 
-void TiXmlElement::SetDoubleAttribute(const char *name, double val)
+void TiXmlElement::SetDoubleAttribute(const char *name, double val, int precision)
 {
     char buf[64];
     std::stringstream sst;
     sst.imbue(std::locale::classic());
     sst << std::fixed;
     sst << std::showpoint;
-    sst << std::setprecision(6);
+    sst << std::setprecision(precision);
     sst << val;
     strncpy(buf, sst.str().c_str(), 63);
     SetAttribute(name, buf);
