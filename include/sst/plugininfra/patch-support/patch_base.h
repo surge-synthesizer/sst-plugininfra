@@ -211,7 +211,7 @@ template <typename Patch, typename Par> struct PatchBase
             std::cerr << __FILE__ << ":" << __LINE__ << "No Patch Element" << std::endl;
             return false;
         }
-        if (strcmp(rn->Attribute("id"), Patch::id) != 0)
+        if ((rn->Attribute("id") == nullptr) || (strcmp(rn->Attribute("id"), Patch::id) != 0))
         {
             std::cerr << __FILE__ << ":" << __LINE__ << "Wrong ID in patch file" << std::endl;
             return false;
