@@ -154,6 +154,14 @@ template <typename Patch, typename Par> struct PatchBase
     std::function<void(TiXmlElement &)> additionalToState{nullptr};
     std::function<void(TiXmlElement *, uint32_t)> additionalFromState{nullptr};
 
+    // Per-param attribute hooks: augment / read each <p> element in place, so param-adjacent state
+    // (feature flags and the like) rides the param it belongs to instead of a disjoint block. `to`
+    // is const (called from toState); `from` gets a mutable param plus the patch version so a
+    // future migration can key off it. Null => no-op, so plugins that do not set them are
+    // unaffected.
+    std::function<void(const Par &, TiXmlElement &)> toAdditionalParamAttributes{nullptr};
+    std::function<void(Par &, TiXmlElement *, uint32_t)> fromAdditionalParamAttributes{nullptr};
+
     std::function<void(TiXmlElement &)> dawExtraStateTo{nullptr};
     std::function<void(TiXmlElement &)> dawExtraStateFrom{nullptr};
 
@@ -176,6 +184,8 @@ template <typename Patch, typename Par> struct PatchBase
             TiXmlElement param("p");
             param.SetAttribute("id", p->meta.id);
             param.SetDoubleAttribute("v", p->value);
+            if (toAdditionalParamAttributes)
+                toAdditionalParamAttributes(*p, param);
             paramsNode.InsertEndChild(param);
         }
 
@@ -266,6 +276,8 @@ template <typename Patch, typename Par> struct PatchBase
                     auto *param = it->second;
                     value = asPatch()->migrateParamValueFromVersion(param, value, ver);
                     it->second->value = value;
+                    if (fromAdditionalParamAttributes)
+                        fromAdditionalParamAttributes(*param, par, ver);
                 }
             }
             else
