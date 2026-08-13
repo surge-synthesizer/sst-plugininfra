@@ -16,6 +16,9 @@
 
 #include <iostream>
 #include <string>
+#include <fstream>
+#include <memory>
+#include <vector>
 
 #include <sst/plugininfra.h>
 #include <sst/plugininfra/userdefaults.h>
@@ -236,6 +239,96 @@ TEST_CASE("Defaults")
         REQUIRE(p2.getUserDefaultValue(Bar, "bb") == "qq");
         REQUIRE(p2.getUserDefaultValue(Three, std::pair{2, 2}) == std::pair{7, 9});
         REQUIRE(p2.getUserDefaultPath(Four, td) == nd);
+    }
+}
+
+TEST_CASE("Malformed defaults file is ignored rather than trusted")
+{
+    // The defaults file sits in a user directory and is plain XML, so it turns up
+    // hand edited, truncated by a half finished write, or written by a build with
+    // different ideas. TiXmlElement::Attribute returns null for anything absent,
+    // and the reader took every attribute on faith: a defaults element with no
+    // version attribute reached strcmp(nullptr, "1"), a default with no key or
+    // value built a std::string from nullptr, and a missing type left the int that
+    // Attribute(name, int*) never wrote to be cast into a ValueType.
+    enum K
+    {
+        Foo,
+        Bar,
+        Three,
+        nK
+    };
+    auto k2s = [](K k) -> std::string {
+        if (k == Foo)
+            return "Foo";
+        if (k == Bar)
+            return "Bar";
+        if (k == Three)
+            return "Three";
+        return "Blugh";
+    };
+    using P = sst::plugininfra::defaults::Provider<K, nK>;
+
+    auto withDefaultsFile = [](const std::string &xml) {
+        int di = 0;
+        auto td = fs::temp_directory_path() / ("udmal_" + std::to_string(di));
+        while (fs::exists(td) && di < 1000)
+        {
+            di++;
+            td = fs::temp_directory_path() / ("udmal_" + std::to_string(di));
+        }
+        REQUIRE(di < 1000);
+        fs::create_directories(td);
+        std::ofstream ofs(td / "TestCaseUserDefaults.xml");
+        ofs << xml;
+        ofs.close();
+        return td;
+    };
+
+    auto swallowErrors = [](auto a, auto b) {};
+
+    // Each of these used to take the reader through a null pointer or an
+    // uninitialised read on construction, so reaching the assertion at all is
+    // most of what is being checked here.
+    struct Case
+    {
+        const char *what;
+        const char *xml;
+    };
+    std::vector<Case> cases{
+        {"no version attribute", R"(<defaults><default key="Foo" type="2" value="3"/></defaults>)"},
+        {"no key attribute", R"(<defaults version="1"><default type="2" value="3"/></defaults>)"},
+        {"no type attribute", R"(<defaults version="1"><default key="Foo" value="3"/></defaults>)"},
+        {"no value attribute", R"(<defaults version="1"><default key="Foo" type="2"/></defaults>)"},
+        {"type that is not a number",
+         R"(<defaults version="1"><default key="Foo" type="banana" value="3"/></defaults>)"},
+        {"int value that is not a number",
+         R"(<defaults version="1"><default key="Foo" type="2" value="banana"/></defaults>)"},
+        {"int value too large for int",
+         R"(<defaults version="1"><default key="Foo" type="2" value="99999999999"/></defaults>)"},
+        {"pair missing its second value",
+         R"(<defaults version="1"><default key="Three" type="3" firstvalue="1"/></defaults>)"},
+    };
+
+    for (const auto &c : cases)
+    {
+        DYNAMIC_SECTION("survives " << c.what)
+        {
+            auto td = withDefaultsFile(c.xml);
+            std::unique_ptr<P> p;
+            REQUIRE_NOTHROW(p = std::make_unique<P>(td, "TestCase", k2s, swallowErrors));
+            // nothing usable was in the file, so the caller's fallback stands
+            REQUIRE(p->getUserDefaultValue(Foo, 7) == 7);
+            REQUIRE(p->getUserDefaultValue(Three, std::pair{2, 2}) == std::pair{2, 2});
+        }
+    }
+
+    SECTION("a well formed file still reads")
+    {
+        auto td = withDefaultsFile(
+            R"(<defaults version="1"><default key="Foo" type="2" value="3"/></defaults>)");
+        auto p = P(td, "TestCase", k2s, swallowErrors);
+        REQUIRE(p.getUserDefaultValue(Foo, 7) == 3);
     }
 }
 
