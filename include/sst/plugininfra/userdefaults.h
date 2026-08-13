@@ -94,7 +94,18 @@ template <typename E, int maxE> struct Provider
             {
                 return valueIfMissing;
             }
-            return std::stoi(vStruct.value);
+            // The type tag and the value come from the same user editable file, so
+            // a value tagged int is not necessarily an int. std::stoi throws on
+            // text and on anything too large to fit, and this function already has
+            // a way to say "no usable value here".
+            try
+            {
+                return std::stoi(vStruct.value);
+            }
+            catch (const std::exception &)
+            {
+                return valueIfMissing;
+            }
         }
         return valueIfMissing;
     }
@@ -213,14 +224,17 @@ template <typename E, int maxE> struct Provider
             TiXmlElement *e = TINYXML_SAFE_TO_ELEMENT(defaultsLoader.FirstChild("defaults"));
             if (e)
             {
+                // TiXmlElement::Attribute returns null for an attribute that is not
+                // there, and this file is user editable, so every read below has to
+                // treat absence as a possibility rather than a guarantee.
                 const char *version = e->Attribute("version");
-                if (strcmp(version, "1") != 0)
+                if (!version || strcmp(version, "1") != 0)
                 {
                     std::ostringstream oss;
                     oss << "This version of " << productName
                         << " reads only version 1 defaults. Your user "
                            "defaults version is "
-                        << version << ". Defaults will be ignored!";
+                        << (version ? version : "absent") << ". Defaults will be ignored!";
                     errorHandler(oss.str(), "File Version Error");
                     return;
                 }
@@ -229,19 +243,44 @@ template <typename E, int maxE> struct Provider
                 while (def)
                 {
                     UserDefaultValue v;
-                    int vt;
-                    def->Attribute("type", &vt);
+
+                    // Attribute(name, int*) leaves the int untouched when the
+                    // attribute is missing, so an entry with no type would other-
+                    // wise cast whatever was on the stack into a ValueType.
+                    int vt{0};
+                    const char *keystring = def->Attribute("key");
+                    const char *typeAttr = def->Attribute("type", &vt);
+
+                    if (!keystring || !typeAttr)
+                    {
+                        def = TINYXML_SAFE_TO_ELEMENT(def->NextSibling("default"));
+                        continue;
+                    }
+
                     v.type = static_cast<UserDefaultValue::ValueType>(vt);
-                    v.keystring = def->Attribute("key");
+                    v.keystring = keystring;
 
                     if (v.type == UserDefaultValue::ud_pair)
                     {
-                        v.vpair.first = std::atoi(def->Attribute("firstvalue"));
-                        v.vpair.second = std::atoi(def->Attribute("secondvalue"));
+                        const char *first = def->Attribute("firstvalue");
+                        const char *second = def->Attribute("secondvalue");
+                        if (!first || !second)
+                        {
+                            def = TINYXML_SAFE_TO_ELEMENT(def->NextSibling("default"));
+                            continue;
+                        }
+                        v.vpair.first = std::atoi(first);
+                        v.vpair.second = std::atoi(second);
                     }
                     else
                     {
-                        v.value = def->Attribute("value");
+                        const char *value = def->Attribute("value");
+                        if (!value)
+                        {
+                            def = TINYXML_SAFE_TO_ELEMENT(def->NextSibling("default"));
+                            continue;
+                        }
+                        v.value = value;
                     }
 
                     // silently disregard default keys we don't recognize
