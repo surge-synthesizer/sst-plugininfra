@@ -244,14 +244,14 @@ template <typename E, int maxE> struct Provider
                 {
                     UserDefaultValue v;
 
-                    // Attribute(name, int*) leaves the int untouched when the
-                    // attribute is missing, so an entry with no type would other-
-                    // wise cast whatever was on the stack into a ValueType.
+                    // QueryIntAttribute reports whether the attribute was there and
+                    // was an integer in one read, where Attribute(name, int*) just
+                    // leaves the int untouched when it is missing - which would cast
+                    // whatever was on the stack into a ValueType.
                     int vt{0};
                     const char *keystring = def->Attribute("key");
-                    const char *typeAttr = def->Attribute("type", &vt);
 
-                    if (!keystring || !typeAttr)
+                    if (!keystring || def->QueryIntAttribute("type", &vt) != TIXML_SUCCESS)
                     {
                         def = TINYXML_SAFE_TO_ELEMENT(def->NextSibling("default"));
                         continue;

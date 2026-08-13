@@ -300,6 +300,8 @@ TEST_CASE("Malformed defaults file is ignored rather than trusted")
         {"no key attribute", R"(<defaults version="1"><default type="2" value="3"/></defaults>)"},
         {"no type attribute", R"(<defaults version="1"><default key="Foo" value="3"/></defaults>)"},
         {"no value attribute", R"(<defaults version="1"><default key="Foo" type="2"/></defaults>)"},
+        {"type that is not a number",
+         R"(<defaults version="1"><default key="Foo" type="banana" value="3"/></defaults>)"},
         {"int value that is not a number",
          R"(<defaults version="1"><default key="Foo" type="2" value="banana"/></defaults>)"},
         {"int value too large for int",
