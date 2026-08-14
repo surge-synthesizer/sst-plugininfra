@@ -442,6 +442,62 @@ TEST_CASE("Keybindings Compile Absent JUCE")
     km->matches(TestKeyPress());
 }
 
+TEST_CASE("Keybindings file with a binding that has no function")
+{
+    // The mappings file sits in a user directory, so a binding element can turn up
+    // without the attribute the reader keys on. TiXmlElement::Attribute returns
+    // null for that, and stringToEnum is keyed by std::string, so the lookup builds
+    // a std::string from nullptr. The textChar and keyCode reads just below it in
+    // the same loop already check before use.
+    enum Foo
+    {
+        FIRST,
+        SECOND,
+        THIRD
+    };
+    struct TestKeyPress
+    {
+        struct M
+        {
+            bool isCtrlDown() const { return false; }
+            bool isAltDown() const { return false; }
+            bool isShiftDown() const { return false; }
+            bool isCommandDown() const { return false; }
+        };
+        M getModifiers() const { return M(); }
+        char getTextCharacter() const { return ' '; }
+        int getKeyCode() const { return 0; }
+    };
+    typedef sst::plugininfra::KeyMapManager<Foo, 3, TestKeyPress> keymap_t;
+
+    auto e2s = [](Foo f) -> std::string {
+        if (f == FIRST)
+            return "first";
+        if (f == SECOND)
+            return "second";
+        return "third";
+    };
+
+    int di = 0;
+    auto td = fs::temp_directory_path() / ("kbtst_" + std::to_string(di));
+    while (fs::exists(td) && di < 1000)
+    {
+        di++;
+        td = fs::temp_directory_path() / ("kbtst_" + std::to_string(di));
+    }
+    REQUIRE(di < 1000);
+    fs::create_directories(td);
+
+    {
+        std::ofstream ofs(td / "TestProductKeyboardMappings.xml");
+        ofs << R"(<keymappings><binding keyCode="65"/></keymappings>)";
+    }
+
+    auto km = std::make_unique<keymap_t>(td, "TestProduct", e2s, [](auto a, auto b) {});
+    REQUIRE(km);
+    REQUIRE_NOTHROW(km->unstreamFromXML());
+}
+
 TEST_CASE("Error when opening a non-existent file")
 {
     auto p = fs::path{"non-existent-file/really/not-there.zipzip"};

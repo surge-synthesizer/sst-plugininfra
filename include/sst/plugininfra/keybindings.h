@@ -212,18 +212,29 @@ template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> stru
         auto c = el->FirstChildElement();
         while (c)
         {
-            FUNCS f;
-            if (stringToEnum.find(c->Attribute("function")) != stringToEnum.end())
+            // Attribute returns null when it isn't there, and stringToEnum is keyed
+            // by std::string, so looking up the result directly builds a string from
+            // nullptr. The textChar and keyCode reads further down this same loop
+            // already check before use.
+            const char *function = c->Attribute("function");
+
+            if (!function)
             {
-                f = stringToEnum[c->Attribute("function")];
-            }
-            else
-            {
-                std::cerr << "Ignoring binding for unknown element " << c->Attribute("function")
-                          << std::endl;
+                std::cerr << "Ignoring binding with no function" << std::endl;
                 c = c->NextSiblingElement();
                 continue;
             }
+
+            const auto fit = stringToEnum.find(function);
+
+            if (fit == stringToEnum.end())
+            {
+                std::cerr << "Ignoring binding for unknown element " << function << std::endl;
+                c = c->NextSiblingElement();
+                continue;
+            }
+
+            const FUNCS f = fit->second;
 
             if (bindings.find(f) == bindings.end())
                 bindings[f] = Binding();
