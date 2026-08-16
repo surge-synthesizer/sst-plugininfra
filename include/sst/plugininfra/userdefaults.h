@@ -41,8 +41,8 @@ template <typename E, int maxE> struct Provider
     Provider(const fs::path &defaultsDirectory, const std::string &productName,
              const std::function<std::string(E)> &e2S,
              const std::function<void(const std::string &, const std::string &)> &errHandle)
-        : defaultsDirectory(defaultsDirectory), productName(productName), enumToString(e2S),
-          errorHandler(errHandle)
+        : enumToString(e2S), errorHandler(errHandle), defaultsDirectory(defaultsDirectory),
+          productName(productName)
     {
         defaultsFile = defaultsDirectory / (productName + "UserDefaults.xml");
         initMaps();
