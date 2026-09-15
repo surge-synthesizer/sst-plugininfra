@@ -498,6 +498,70 @@ TEST_CASE("Keybindings file with a binding that has no function")
     REQUIRE_NOTHROW(km->unstreamFromXML());
 }
 
+TEST_CASE("Keybindings Can Stream Only Changed Bindings")
+{
+    enum Foo
+    {
+        FIRST,
+        SECOND
+    };
+    struct TestKeyPress
+    {
+        struct M
+        {
+            bool isCtrlDown() const { return false; }
+            bool isAltDown() const { return false; }
+            bool isShiftDown() const { return false; }
+            bool isCommandDown() const { return false; }
+        };
+        M getModifiers() const { return M(); }
+        char getTextCharacter() const { return ' '; }
+        int getKeyCode() const { return 0; }
+    };
+    typedef sst::plugininfra::KeyMapManager<Foo, 2, TestKeyPress> keymap_t;
+
+    auto e2s = [](Foo f) -> std::string { return f == FIRST ? "first" : "second"; };
+
+    int di = 0;
+    auto td = fs::temp_directory_path() / ("kbchg_" + std::to_string(di));
+    while (fs::exists(td) && di < 1000)
+    {
+        di++;
+        td = fs::temp_directory_path() / ("kbchg_" + std::to_string(di));
+    }
+    REQUIRE(di < 1000);
+    fs::create_directories(td);
+
+    {
+        auto km = std::make_unique<keymap_t>(td, "TestProduct", e2s, [](auto a, auto b) {});
+        km->streamDefaultBindings = false;
+        km->addBinding(FIRST, {(int)'S'});
+        km->addBinding(SECOND, {(int)'T'});
+        km->bindings[SECOND].keyCode = 'U';
+        km->streamToXML();
+    }
+
+    TiXmlDocument doc;
+    REQUIRE(doc.LoadFile(td / "TestProductKeyboardMappings.xml"));
+    auto el = doc.FirstChildElement("keymappings");
+    REQUIRE(el);
+    int count{0};
+    for (auto c = el->FirstChildElement(); c; c = c->NextSiblingElement())
+    {
+        REQUIRE(std::string(c->Attribute("function")) == "second");
+        count++;
+    }
+    REQUIRE(count == 1);
+
+    // a default which changes after the file was written still applies
+    auto km2 = std::make_unique<keymap_t>(td, "TestProduct", e2s, [](auto a, auto b) {});
+    km2->addBinding(FIRST, {(int)'X'});
+    km2->addBinding(SECOND, {(int)'T'});
+    REQUIRE(km2->unstreamFromXML());
+    REQUIRE(km2->bindings[FIRST].keyCode == 'X');
+    REQUIRE(km2->bindings[SECOND].keyCode == 'U');
+}
+
 TEST_CASE("Error when opening a non-existent file")
 {
     auto p = fs::path{"non-existent-file/really/not-there.zipzip"};
