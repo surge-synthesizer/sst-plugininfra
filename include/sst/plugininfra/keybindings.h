@@ -174,6 +174,10 @@ template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> stru
 
     std::map<FUNCS, Binding> bindings; // want this ordered for iteration display
     std::map<FUNCS, Binding> defaultBindings;
+
+    // when false only changed bindings are written, so later default changes still reach users
+    bool streamDefaultBindings{true};
+
     void clearBindings()
     {
         bindings.clear();
@@ -278,6 +282,13 @@ template <typename FUNCS, int maxFunc, typename KEY /* = juce::KeyPress */> stru
 
         for (const auto &[f, b] : bindings)
         {
+            if (!streamDefaultBindings)
+            {
+                auto d = defaultBindings.find(f);
+                if (d != defaultBindings.end() && d->second == b)
+                    continue;
+            }
+
             TiXmlElement bx("binding");
             bx.SetAttribute("function", enumToString(f));
 
