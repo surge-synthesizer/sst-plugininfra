@@ -132,20 +132,34 @@ fs::path lookupXdgUserPathWithStream(const char *xdgDirId, std::istream &stream)
 }
 
 /*
+ * An XDG base directory variable, or empty if unset. The basedir spec says an empty or
+ * relative value must be treated as unset.
+ */
+static fs::path xdgBaseDir(const char *envName)
+{
+    const char *const value = getenv(envName);
+    if (!value || !value[0])
+        return fs::path{};
+    auto p = fs::path{value};
+    if (!p.is_absolute())
+        return fs::path{};
+    return p;
+}
+
+/*
  * Extract a custom user path defined in the file `user-dirs.dirs`.
  */
 fs::path lookupXdgUserPath(const char *xdgDirId)
 {
-    fs::path home = homePath();
     fs::path userDirsPath;
 
-    if (const char *xdgConfigPath = getenv("XDG_CONFIG_HOME"))
+    if (auto xdgConfigPath = xdgBaseDir("XDG_CONFIG_HOME"); !xdgConfigPath.empty())
     {
-        userDirsPath = fs::path{xdgConfigPath} / "user-dirs.dirs";
+        userDirsPath = xdgConfigPath / "user-dirs.dirs";
     }
     else
     {
-        userDirsPath = home / ".config" / "user-dirs.dirs";
+        userDirsPath = homePath() / ".config" / "user-dirs.dirs";
     }
 
 #if SST_PLUGINFRA_GHC_FS
@@ -156,43 +170,69 @@ fs::path lookupXdgUserPath(const char *xdgDirId)
     return lookupXdgUserPathWithStream(xdgDirId, stream);
 }
 
+static bool isSameDirectory(const fs::path &a, const fs::path &b)
+{
+    // "/home/me/" and "/home/me" differ lexically, so drop the trailing separator
+    auto norm = [](fs::path p) {
+        p = p.lexically_normal();
+        if (!p.has_filename())
+            p = p.parent_path();
+        return p;
+    };
+    if (norm(a) == norm(b))
+        return true;
+    std::error_code ec;
+    return fs::equivalent(a, b, ec);
+}
+
+/*
+ * The user's documents folder, or empty if there isn't one. xdg-user-dirs marks a
+ * directory as disabled by setting it to $HOME, so that counts as not having one.
+ */
+static fs::path documentsRoot()
+{
+    auto hp = homePath();
+
+    auto xdgdd = lookupXdgUserPath("XDG_DOCUMENTS_DIR");
+    if (!xdgdd.empty() && !isSameDirectory(xdgdd, hp))
+        return xdgdd;
+
+    if (auto documents = hp / "Documents"; fs::is_directory(documents))
+        return documents;
+    return fs::path{};
+}
+
 /*
  * The waterfall we use here is as follows
  *
- * 1. Is XDG_DOCUMENTS_DIR set - if so use that with productName
- * 2. Does ~/Documents exists? If so use that
- * 3. Else use ~/.productName
+ * 1. Find the documents root: XDG_DOCUMENTS_DIR unless disabled, else an existing ~/Documents
+ * 2. If root/vendor/product exists, use it
+ * 3. If root/product exists, use it, so folders made without the vendor keep working
+ * 4. If ~/.vendor/product exists, use it
+ * 5. Otherwise root/vendor/product, or ~/.vendor/product if there is no documents root
  */
 fs::path bestDocumentsVendorFolderPathFor(const std::string &vendorName,
                                           const std::string &productName)
 {
-    fs::path xdgdd = lookupXdgUserPath("XDG_DOCUMENTS_DIR");
-    if (!xdgdd.empty())
-    {
-        auto xdgpath = xdgdd / productName;
-        return xdgpath;
-    }
-
     auto hp = homePath();
+    auto root = documentsRoot();
 
-    // If the user has already made one pick it
-    auto documentpn = hp / "Documents" / productName;
     auto dotpn = hp / ("." + productName);
-
     if (!vendorName.empty())
-    {
-        documentpn = hp / "Documents" / vendorName / productName;
         dotpn = hp / ("." + vendorName) / productName;
+
+    if (!root.empty())
+    {
+        auto vendorpn = vendorName.empty() ? root / productName : root / vendorName / productName;
+        if (fs::is_directory(vendorpn))
+            return vendorpn;
+        if (auto legacypn = root / productName; fs::is_directory(legacypn))
+            return legacypn;
+        if (fs::is_directory(dotpn))
+            return dotpn;
+        return vendorpn;
     }
 
-    if (fs::is_directory(dotpn))
-        return dotpn;
-    if (fs::is_directory(documentpn))
-        return documentpn;
-
-    // Neither is there. Do I have a Documents folder?
-    if (auto documents = hp / "Documents"; fs::is_directory(documents))
-        return documents / productName;
     return dotpn;
 }
 
@@ -203,12 +243,12 @@ fs::path bestLibrarySharedVendorFolderPathFor(const std::string &vendorName,
     {
         fs::path home = homePath();
 
-        if (const char *xdgDataPath = getenv("XDG_DATA_HOME"))
+        if (auto xdgDataPath = xdgBaseDir("XDG_DATA_HOME"); !xdgDataPath.empty())
         {
             if (!vendorName.empty())
-                return fs::path{xdgDataPath} / vendorName / productName;
+                return xdgDataPath / vendorName / productName;
             else
-                return fs::path{xdgDataPath} / productName;
+                return xdgDataPath / productName;
         }
         else
         {
