@@ -71,8 +71,7 @@ inline bool inStreamToPatch(const clap_istream *istream, Patch &patch) noexcept
     }
 
     auto data = std::string(buffer.data());
-    patch.fromState(data);
-    return true;
+    return patch.fromState(data);
 }
 
 template <typename Patch>
