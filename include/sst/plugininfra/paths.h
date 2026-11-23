@@ -46,6 +46,10 @@ fs::path sharedLibraryBinaryPath();
  * bestDocumentsFolderPathFor gives the "~/Documents/productName" folder or OS specific equivalent.
  * Importantly this does *not* return any sort of portable name but only uses the OS-specific
  * documents folder resolution strategy. For portable documents folder use sharedLibraryBinaryPath
+ *
+ * On macOS this prefers ~/Music/vendor/product. An existing ~/Music folder wins, then an
+ * existing ~/Documents folder (so older installs are not moved), and if neither exists the
+ * ~/Music folder is returned.
  */
 fs::path bestDocumentsVendorFolderPathFor(const std::string &vendorName,
                                           const std::string &productName);

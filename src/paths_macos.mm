@@ -35,20 +35,35 @@ fs::path sharedLibraryBinaryPath()
     return fs::path{info.dli_fname};
 }
 
+namespace
+{
+fs::path userDirectory(NSSearchPathDirectory which)
+{
+    auto *u = [[NSFileManager defaultManager] URLsForDirectory:which inDomains:NSUserDomainMask]
+                  .firstObject;
+    if (!u)
+        return fs::path{};
+    return fs::path{[u fileSystemRepresentation]};
+}
+} // namespace
+
 fs::path bestDocumentsVendorFolderPathFor(const std::string &vendorName,
                                           const std::string &productName)
 {
-    auto *fileManager = [NSFileManager defaultManager];
-    auto *resultURLs = [fileManager URLsForDirectory:NSDocumentDirectory
-                                           inDomains:NSUserDomainMask];
-    if (resultURLs)
-    {
-        auto *u = [resultURLs objectAtIndex:0];
-        if (!vendorName.empty())
-            return fs::path{[u fileSystemRepresentation]} / vendorName / productName;
-        else
-            return fs::path{[u fileSystemRepresentation]} / productName;
-    }
+    auto sub = vendorName.empty() ? fs::path{productName} : fs::path{vendorName} / productName;
+    auto music = userDirectory(NSMusicDirectory);
+    auto docs = userDirectory(NSDocumentDirectory);
+
+    // apple wants ~/Music but an existing ~/Documents folder stays put
+    std::error_code ec;
+    if (!music.empty() && fs::is_directory(music / sub, ec))
+        return music / sub;
+    if (!docs.empty() && fs::is_directory(docs / sub, ec))
+        return docs / sub;
+    if (!music.empty())
+        return music / sub;
+    if (!docs.empty())
+        return docs / sub;
     return fs::path{};
 }
 
